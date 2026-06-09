@@ -6,11 +6,23 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { INITIAL_VIEW_STATE, MAP_STYLE } from "../config";
 import {
-  ARC_IN, ARC_OUT, ARC_SOURCE, ARC_TARGET, HILITE, withAlpha, type ColorScale,
+  ARC_IN,
+  ARC_OUT,
+  ARC_SOURCE,
+  ARC_TARGET,
+  HILITE,
+  withAlpha,
+  type ColorScale,
 } from "../colors";
 import type { Flow, Focus, Nav } from "../types";
 
-export interface CityNode { id: number; name: string; lon: number; lat: number; total: number }
+export interface CityNode {
+  id: number;
+  name: string;
+  lon: number;
+  lat: number;
+  total: number;
+}
 
 interface Props {
   flows: Flow[];
@@ -27,15 +39,28 @@ interface Props {
 type Role = "out" | "in" | "internal" | "none";
 
 export default function MapView({
-  flows, nav, focus, showLines, geojsonValueBySigla, colorScale, cityNodes,
-  onPickState, onPickCity,
+  flows,
+  nav,
+  focus,
+  showLines,
+  geojsonValueBySigla,
+  colorScale,
+  cityNodes,
+  onPickState,
+  onPickCity,
 }: Props) {
   const view = nav.view;
   const selectedSigla = nav.state?.sigla ?? null;
   const focusCityId = nav.city?.id ?? null;
 
-  const maxCount = useMemo(() => Math.max(1, ...flows.map((f) => f.count)), [flows]);
-  const maxNode = useMemo(() => Math.max(1, ...cityNodes.map((n) => n.total)), [cityNodes]);
+  const maxCount = useMemo(
+    () => Math.max(1, ...flows.map((f) => f.count)),
+    [flows],
+  );
+  const maxNode = useMemo(
+    () => Math.max(1, ...cityNodes.map((n) => n.total)),
+    [cityNodes],
+  );
 
   const roleOf = (a: Flow): Role => {
     if (view === "state") {
@@ -96,18 +121,29 @@ export default function MapView({
         getTargetPosition: (d) => [d.d_lon, d.d_lat],
         getSourceColor: (d) => {
           const r = roleOf(d);
-          return r === "out" ? ARC_OUT : r === "in" ? withAlpha(ARC_IN, 70) : ARC_SOURCE;
+          return r === "out"
+            ? ARC_OUT
+            : r === "in"
+              ? withAlpha(ARC_IN, 70)
+              : ARC_SOURCE;
         },
         getTargetColor: (d) => {
           const r = roleOf(d);
-          return r === "in" ? ARC_IN : r === "out" ? withAlpha(ARC_OUT, 70) : ARC_TARGET;
+          return r === "in"
+            ? ARC_IN
+            : r === "out"
+              ? withAlpha(ARC_OUT, 70)
+              : ARC_TARGET;
         },
         getWidth: (d) => 1 + (Math.sqrt(d.count) / Math.sqrt(maxCount)) * 9,
         getHeight: 0.4,
         pickable: true,
         autoHighlight: true,
         highlightColor: [255, 255, 255, 220],
-        updateTriggers: { getSourceColor: [view, focus], getTargetColor: [view, focus] },
+        updateTriggers: {
+          getSourceColor: [view, focus],
+          getTargetColor: [view, focus],
+        },
       }),
 
     // City nodes (state & city views) — clickable; focused city gets an amber ring.
@@ -116,18 +152,22 @@ export default function MapView({
         id: "cities",
         data: cityNodes,
         getPosition: (d) => [d.lon, d.lat],
-        getRadius: (d) => 2000 + (Math.sqrt(d.total) / Math.sqrt(maxNode)) * 26000,
+        getRadius: (d) =>
+          2000 + (Math.sqrt(d.total) / Math.sqrt(maxNode)) * 26000,
         radiusUnits: "meters",
         radiusMinPixels: 3,
-        getFillColor: (d) => (d.id === focusCityId ? [255, 235, 160, 230] : [235, 240, 250, 190]),
-        getLineColor: (d) => (d.id === focusCityId ? HILITE : [10, 12, 16, 220]),
+        getFillColor: (d) =>
+          d.id === focusCityId ? [255, 235, 160, 230] : [235, 240, 250, 190],
+        getLineColor: (d) =>
+          d.id === focusCityId ? HILITE : [10, 12, 16, 220],
         getLineWidth: (d) => (d.id === focusCityId ? 3 : 1),
         lineWidthUnits: "pixels",
         stroked: true,
         pickable: true,
         autoHighlight: true,
         highlightColor: [255, 255, 255, 120],
-        onClick: (info: any) => info.object && onPickCity(info.object.id, info.object.name),
+        onClick: (info: any) =>
+          info.object && onPickCity(info.object.id, info.object.name),
         updateTriggers: {
           getFillColor: [focusCityId],
           getLineColor: [focusCityId],
@@ -163,7 +203,10 @@ function getTooltip({ object, layer }: any) {
     };
   }
   if (layer?.id === "uf") {
-    return { html: `<div class="tt-title">${object.properties.name}</div>`, className: "deck-tt" };
+    return {
+      html: `<div class="tt-title">${object.properties.name}</div>`,
+      className: "deck-tt",
+    };
   }
   if (layer?.id === "cities") {
     return {

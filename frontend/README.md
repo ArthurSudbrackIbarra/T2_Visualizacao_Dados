@@ -17,12 +17,14 @@ Para apontar para outra API: `VITE_API_BASE=http://host:porta/api npm run dev`.
 Build de produção: `npm run build` (saída em `dist/`).
 
 ## Stack
+
 - **Vite + React + TypeScript**
 - **deck.gl** (`ArcLayer`, `GeoJsonLayer`, `ScatterplotLayer`) sobre **react-map-gl / MapLibre**
   (basemap CARTO dark, sem token)
 - **d3-scale / d3-scale-chromatic** (escalas de cor) · **recharts** (gráficos dos painéis)
 
 ## Estrutura (`src/`)
+
 ```
 config.ts        API_BASE, basemap, métricas, constantes
 types.ts         tipos espelhando as respostas da API
@@ -38,6 +40,7 @@ public/geo/br-uf.geojson   malha das 27 UFs (coroplético)
 ```
 
 ## Interações
+
 - **Filtrar** por especialidade, ano, mês e métrica do coroplético.
 - **Play sazonal**: anima os meses do ano (responde Q4).
 - **Drill-down**: clicar num estado troca para nível município, filtrado àquela UF.

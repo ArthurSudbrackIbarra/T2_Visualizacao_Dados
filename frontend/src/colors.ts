@@ -1,7 +1,11 @@
 // Color scales for the choropleth, derived per-metric from the current data range.
 
 import { scaleDiverging, scaleSequential } from "d3-scale";
-import { interpolateRdBu, interpolateYlOrRd, interpolateViridis } from "d3-scale-chromatic";
+import {
+  interpolateRdBu,
+  interpolateYlOrRd,
+  interpolateViridis,
+} from "d3-scale-chromatic";
 
 export type RGBA = [number, number, number, number];
 
@@ -21,7 +25,11 @@ export interface ColorScale {
 export function buildColorScale(metric: string, values: number[]): ColorScale {
   const nums = values.filter((v) => v != null && isFinite(v));
   if (nums.length === 0) {
-    return { color: () => [120, 120, 120, 120], domain: [0, 1], diverging: false };
+    return {
+      color: () => [120, 120, 120, 120],
+      domain: [0, 1],
+      diverging: false,
+    };
   }
   const min = Math.min(...nums);
   const max = Math.max(...nums);
@@ -31,7 +39,8 @@ export function buildColorScale(metric: string, values: number[]): ColorScale {
     const abs = Math.max(Math.abs(min), Math.abs(max)) || 1;
     const s = scaleDiverging<number, number>((t) => t).domain([-abs, 0, abs]);
     return {
-      color: (v) => (v == null ? [90, 90, 90, 100] : toRGBA(interpolateRdBu(1 - s(v)))),
+      color: (v) =>
+        v == null ? [90, 90, 90, 100] : toRGBA(interpolateRdBu(1 - s(v))),
       domain: [-abs, abs],
       diverging: true,
     };
@@ -59,8 +68,8 @@ export const ARC_SOURCE: RGBA = [255, 170, 50, 200]; // origin (orange)
 export const ARC_TARGET: RGBA = [40, 200, 255, 200]; // destination (cyan)
 
 // directional roles relative to the focused entity
-export const ARC_OUT: RGBA = [255, 150, 40, 235];   // leaving the focus (warm)
-export const ARC_IN: RGBA = [60, 180, 255, 235];    // arriving at the focus (cool)
+export const ARC_OUT: RGBA = [255, 150, 40, 235]; // leaving the focus (warm)
+export const ARC_IN: RGBA = [60, 180, 255, 235]; // arriving at the focus (cool)
 
 // selection highlight (amber) — used for selected state border & focused city ring
 export const HILITE: RGBA = [255, 205, 60, 255];

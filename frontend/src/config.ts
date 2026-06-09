@@ -1,6 +1,7 @@
 // Central config: API base, basemap, and shared constants.
 
-export const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api";
+export const API_BASE =
+  import.meta.env.VITE_API_BASE ?? "http://localhost:8000/api";
 
 // CARTO dark basemap (free, no token) — makes the flow arcs pop.
 export const MAP_STYLE =
@@ -26,6 +27,16 @@ export const METRICS = [
 export type MetricId = (typeof METRICS)[number]["id"];
 
 export const MONTH_NAMES = [
-  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+  "Jan",
+  "Fev",
+  "Mar",
+  "Abr",
+  "Mai",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Set",
+  "Out",
+  "Nov",
+  "Dez",
 ];
