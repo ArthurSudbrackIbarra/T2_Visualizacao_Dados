@@ -68,13 +68,14 @@ def main() -> None:
     con.execute(
         """
         CREATE TABLE dim_uf AS
-        SELECT uf,
-               COUNT(*)        AS qtd_municipios,
-               AVG(lat)        AS lat,   -- simple centroid (mean of municipality coords)
-               AVG(lon)        AS lon
+        SELECT (munic_id // 10000)::TINYINT AS uf_cod,   -- numeric code (joins fato_fluxo.uf_*)
+               uf                           AS sigla,    -- 'PE' (joins br-uf.geojson)
+               COUNT(*)                     AS qtd_municipios,
+               AVG(lat)                     AS lat,       -- simple centroid (mean of municipality coords)
+               AVG(lon)                     AS lon
         FROM dim_municipio
         WHERE lat IS NOT NULL
-        GROUP BY uf
+        GROUP BY uf_cod, sigla
         """
     )
     con.execute(

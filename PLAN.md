@@ -56,15 +56,18 @@ Métricas-chave deriváveis (mapeadas às perguntas):
 - Ranking de municípios "polo" por região → **Q3** ✓
 - Série mensal: % migrantes vs residentes nos picos → **Q4** (via `fato_fluxo.mes`) ✓
 
-## Fase 2 — Backend FastAPI (1–2 dias)
-`backend/app/` servindo só agregados. Endpoints (parametrizados por ano, mes, espec, nível):
-- [ ] `GET /api/flows?level=uf|munic&year=&month=&espec=&min_count=&origin=` → lista de
-      arcos `{orig:{id,lat,lon,name}, dest:{...}, count, share, ...}` (top-N + filtro).
-- [ ] `GET /api/nodes?level=&year=&espec=&metric=saldo|exportacao|recebidas` → para coroplético.
-- [ ] `GET /api/timeseries?munic|uf=&espec=` → série mensal (migrantes vs residentes) → Q4.
-- [ ] `GET /api/ranking?regiao=&espec=&metric=` → cidades-polo → Q3.
-- [ ] `GET /api/meta` → listas de especialidades, anos, UFs (popular os controles do front).
-- [ ] CORS liberado p/ o front; cache simples em memória (lru_cache) por combinação de filtros.
+## Fase 2 — Backend FastAPI ✅ CONCLUÍDA
+`backend/app/` servindo só agregados. Rodar: `uv run uvicorn backend.app.main:app --reload --port 8000`.
+Docs interativas em `/docs`. Estrutura: `main.py`, `config.py`, `db.py` (DuckDB read-only),
+`routers/{meta,flows,nodes,analysis}.py`. Todos testados (consultas ~70 ms).
+- [x] `GET /api/flows?level=uf|munic&year=&month=&espec=&uf=&min_count=&limit=` → arcos
+      `{o_id,o_name,o_lat,o_lon,d_*,count,obitos,val_tot,dias_perm}`. `uf=` faz drill-down.
+- [x] `GET /api/nodes?level=&year=&espec=&metric=saldo|taxa_exportacao|recebidas|exportadas|recebidas_por_1k`.
+- [x] `GET /api/timeseries?level=&id=&espec=&year=` → série mensal residentes vs migrantes → Q4.
+- [x] `GET /api/ranking?year=&espec=&uf=&metric=&limit=` → cidades-polo → Q3.
+- [x] `GET /api/meta` → especialidades, complexidades, anos, UFs (com centróide).
+- [x] CORS liberado p/ Vite (localhost:5173); cache em memória (`lru_cache`) por combinação de filtros.
+- [x] Setup/reprodução documentado no `README.md` da raiz.
 
 ## Fase 3 — Frontend React + deck.gl (3–5 dias) ⭐ onde está a nota
 - [ ] Mapa base MapLibre + deck.gl sobre o Brasil.
