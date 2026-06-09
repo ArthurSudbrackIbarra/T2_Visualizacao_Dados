@@ -43,6 +43,7 @@ export const api = {
     espec?: number | null;
     uf?: number | null;
     metric?: string;
+    order?: string;
     limit?: number;
   }) => get<RankingRow[]>("/ranking", p),
 

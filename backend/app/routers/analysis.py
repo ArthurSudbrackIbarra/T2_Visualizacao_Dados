@@ -63,7 +63,7 @@ def timeseries(
 # --------------------------------------------------------------------------- Q3
 @lru_cache(maxsize=256)
 def _ranking(
-    year: int, espec: int | None, uf: int | None, metric: str, limit: int
+    year: int, espec: int | None, uf: int | None, metric: str, order: str, limit: int
 ) -> list[dict]:
     where = ["f.ano = ?"]
     params: list = [year]
@@ -80,6 +80,7 @@ def _ranking(
         "exportadas": "exportadas",
         "taxa_exportacao": "taxa_exportacao",
     }[metric]
+    direction_sql = "ASC" if order == "asc" else "DESC"
 
     sql = f"""
         SELECT m.munic_id AS id, m.nome, m.uf, m.regiao_saude,
@@ -95,21 +96,22 @@ def _ranking(
         JOIN dim_municipio m ON f.munic_id = m.munic_id
         WHERE {' AND '.join(where)}
         GROUP BY m.munic_id, m.nome, m.uf, m.regiao_saude
-        ORDER BY {order_expr} DESC NULLS LAST
+        ORDER BY {order_expr} {direction_sql} NULLS LAST
         LIMIT ?
     """
     params.append(limit)
     return db.query(sql, params)
 
 
-@router.get("/ranking", summary="Q3 — municípios-polo (maior atração líquida)")
+@router.get("/ranking", summary="Q3 — ranking de municípios por atração/dependência")
 def ranking(
     year: int = Query(..., ge=2008, le=2023),
     espec: int | None = None,
     uf: int | None = Query(None, description="filtra municípios de uma UF (código)"),
     metric: str = Query("saldo"),
+    order: str = Query("desc", pattern="^(asc|desc)$"),
     limit: int = Query(20, ge=1, le=200),
 ) -> list[dict]:
     if metric not in _RANK_METRICS:
         metric = "saldo"
-    return _ranking(year, espec, uf, metric, limit)
+    return _ranking(year, espec, uf, metric, order, limit)

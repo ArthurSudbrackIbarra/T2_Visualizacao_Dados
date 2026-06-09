@@ -17,7 +17,7 @@ export const INITIAL_VIEW_STATE = {
 };
 
 export const METRICS = [
-  { id: "saldo", label: "Saldo (atração líquida)" },
+  { id: "saldo", label: "Atração assistencial (saldo)" },
   { id: "taxa_exportacao", label: "Taxa de exportação" },
   { id: "recebidas", label: "Internações recebidas" },
   { id: "exportadas", label: "Internações exportadas" },

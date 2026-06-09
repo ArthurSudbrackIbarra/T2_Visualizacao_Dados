@@ -12,17 +12,39 @@ import {
 import { api } from "../api";
 import { MONTH_NAMES } from "../config";
 import Help from "./Help";
-import type { Filters, Meta, Nav, RankingRow, TimePoint } from "../types";
+import type {
+  Filters,
+  Meta,
+  Nav,
+  NodeMetric,
+  RankingRow,
+  TimePoint,
+} from "../types";
 
 interface Props {
   meta: Meta;
   filters: Filters;
   nav: Nav;
+  ufNodes: NodeMetric[];
 }
 
-export default function InfoPanel({ meta, filters, nav }: Props) {
+interface RankItem {
+  id: number;
+  nome: string;
+  uf: string;
+  saldo: number;
+}
+
+export default function InfoPanel({ meta, filters, nav, ufNodes }: Props) {
   const [ranking, setRanking] = useState<RankingRow[]>([]);
   const [series, setSeries] = useState<TimePoint[]>([]);
+  // "desc" = most attract patients; "asc" = most dependent on others
+  const [rankOrder, setRankOrder] = useState<"desc" | "asc">("desc");
+
+  // National view ranks STATES; once a state is selected, ranks its MUNICIPALITIES.
+  const rankingByState = nav.state != null;
+  const entity = rankingByState ? "município" : "estado";
+  const entityPlural = rankingByState ? "municípios" : "estados";
 
   // the entity whose seasonality we chart: focused city, else selected state, else none
   const seriesFocus = nav.city
@@ -31,19 +53,24 @@ export default function InfoPanel({ meta, filters, nav }: Props) {
       ? { level: "uf" as const, id: nav.state.cod, name: nav.state.name }
       : null;
 
-  // Q3 — polo cities, scoped to the selected state when drilled in.
+  // Q3 — municipality ranking, only when a state is selected (else we rank states).
   useEffect(() => {
+    if (!rankingByState) {
+      setRanking([]);
+      return;
+    }
     api
       .ranking({
         year: filters.year,
         espec: filters.espec,
-        uf: nav.state?.cod ?? null,
+        uf: nav.state!.cod,
         metric: "saldo",
+        order: rankOrder,
         limit: 12,
       })
       .then(setRanking)
       .catch(() => setRanking([]));
-  }, [filters.year, filters.espec, nav.state?.cod]);
+  }, [filters.year, filters.espec, nav.state?.cod, rankOrder, rankingByState]);
 
   // Q4 — monthly residents vs incoming migrants for the focused entity.
   useEffect(() => {
@@ -66,7 +93,17 @@ export default function InfoPanel({ meta, filters, nav }: Props) {
     ? meta.especialidades.find((e) => e.id === filters.espec)?.nome
     : "Todas as especialidades";
 
-  const maxSaldo = Math.max(1, ...ranking.map((r) => Math.abs(r.saldo)));
+  // unified ranking list: states (from ufNodes) nationally, municipalities within a state
+  const rankItems: RankItem[] = rankingByState
+    ? ranking.map((r) => ({ id: r.id, nome: r.nome, uf: r.uf, saldo: r.saldo }))
+    : ufNodes
+        .map((n) => ({ id: n.id, nome: n.uf, uf: "", saldo: n.saldo }))
+        .sort((a, b) =>
+          rankOrder === "desc" ? b.saldo - a.saldo : a.saldo - b.saldo,
+        )
+        .slice(0, 12);
+
+  const maxSaldo = Math.max(1, ...rankItems.map((r) => Math.abs(r.saldo)));
   const chartData = series.map((p) => ({
     mes: MONTH_NAMES[p.mes - 1],
     Residentes: p.residentes,
@@ -84,9 +121,12 @@ export default function InfoPanel({ meta, filters, nav }: Props) {
         <h3>
           Sazonalidade {seriesFocus ? `· ${seriesFocus.name}` : ""}
           <Help wide align="right">
-            Internações por mês no destino selecionado, separando moradores do
-            próprio local (Residentes) de pacientes vindos de fora (Migrantes).
-            Útil para ver se os picos sazonais são puxados por migração.
+            Internações mês a mês no{" "}
+            {seriesFocus?.level === "munic" ? "município" : "estado"}{" "}
+            selecionado, separando os <b>residentes</b> (moradores do próprio
+            local) dos <b>migrantes</b> (pacientes que vieram de fora). Ajuda a
+            ver se os picos de internação ao longo do ano são puxados por
+            pacientes de fora ou pelos próprios moradores.
           </Help>
         </h3>
         {seriesFocus ? (
@@ -109,14 +149,14 @@ export default function InfoPanel({ meta, filters, nav }: Props) {
                 <RLegend wrapperStyle={{ fontSize: 11 }} />
                 <Line
                   type="monotone"
-                  dataKey="Residentes"
+                  dataKey="residentes"
                   stroke="#3cb4ff"
                   dot={false}
                   strokeWidth={2}
                 />
                 <Line
                   type="monotone"
-                  dataKey="Migrantes"
+                  dataKey="migrantes"
                   stroke="#ff9628"
                   dot={false}
                   strokeWidth={2}
@@ -136,19 +176,37 @@ export default function InfoPanel({ meta, filters, nav }: Props) {
 
       <section>
         <h3>
-          Cidades-polo {nav.state ? `· ${nav.state.sigla}` : "· Brasil"}
+          Atração assistencial {nav.state ? `· ${nav.state.sigla}` : "· Brasil"}
           <Help wide align="right">
-            Municípios com maior saldo (recebidas menos residentes): os que mais
-            "sustentam" a internação de outras cidades. Barras azuis = atraem
-            pacientes; vermelhas = exportam mais.
+            Mede o quanto cada {entity} atrai internações de fora. O saldo é o
+            total de internações realizadas no {entity} (pacientes de qualquer
+            origem) menos as internações geradas pelos seus próprios moradores.
+            Saldo positivo (azul) indica um polo de saúde, que trata mais gente
+            do que a própria população demanda; saldo negativo (vermelho) indica
+            um {entity} cujos moradores precisam se internar em outros{" "}
+            {entityPlural}.
           </Help>
         </h3>
+        <div className="seg small">
+          <button
+            className={rankOrder === "desc" ? "on" : ""}
+            onClick={() => setRankOrder("desc")}
+          >
+            Mais atraem
+          </button>
+          <button
+            className={rankOrder === "asc" ? "on" : ""}
+            onClick={() => setRankOrder("asc")}
+          >
+            Mais dependem
+          </button>
+        </div>
         <ol className="ranking">
-          {ranking.map((r) => (
+          {rankItems.map((r) => (
             <li key={r.id}>
               <div className="rk-row">
                 <span className="rk-name">
-                  {r.nome} <em>{r.uf}</em>
+                  {r.nome} {r.uf && <em>{r.uf}</em>}
                 </span>
                 <span className="rk-val">
                   {r.saldo.toLocaleString("pt-BR")}
@@ -164,7 +222,7 @@ export default function InfoPanel({ meta, filters, nav }: Props) {
               </div>
             </li>
           ))}
-          {!ranking.length && <p className="muted">Sem dados.</p>}
+          {!rankItems.length && <p className="muted">Sem dados.</p>}
         </ol>
       </section>
     </div>

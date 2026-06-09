@@ -199,7 +199,7 @@ export default function App() {
         setFilters={setFilters}
         view={nav.view}
       />
-      <InfoPanel meta={meta} filters={filters} nav={nav} />
+      <InfoPanel meta={meta} filters={filters} nav={nav} ufNodes={ufNodes} />
       <Legend
         metric={filters.metric}
         scale={colorScale}

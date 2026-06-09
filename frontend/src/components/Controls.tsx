@@ -10,17 +10,18 @@ interface Props {
   view: View;
 }
 
+// The choropleth always colors states (UF), regardless of the navigation level.
 const METRIC_HELP: Record<string, string> = {
   saldo:
-    "Recebidas menos residentes. Positivo (azul) indica um polo que atrai pacientes de fora; negativo (vermelho) indica que o local exporta mais do que recebe.",
+    "Internações recebidas pelo estado menos as geradas pelos seus moradores. Positivo (azul): o estado atrai pacientes de fora; negativo (vermelho): exporta mais do que recebe.",
   taxa_exportacao:
-    "Fração das internações dos moradores que foi realizada em outro município. Valores altos sugerem falta de oferta local.",
+    "Fração das internações dos moradores do estado que foi realizada em outro município. Valores altos sugerem falta de oferta local.",
   recebidas:
-    "Total de internações realizadas nos hospitais do local (de moradores e de pacientes de fora).",
+    "Total de internações realizadas nos hospitais do estado, somando moradores e pacientes vindos de fora.",
   exportadas:
-    "Internações de moradores do local realizadas em outro município.",
+    "Internações de moradores do estado que foram realizadas em outro município.",
   recebidas_por_1k:
-    "Internações recebidas por 1.000 habitantes (normaliza pelo tamanho da população). Disponível apenas até 2021.",
+    "Internações recebidas pelo estado por 1.000 habitantes (normaliza pelo tamanho da população). Disponível apenas até 2021.",
 };
 
 const DIRS: { id: Direction; label: string }[] = [
@@ -56,6 +57,14 @@ export default function Controls({ meta, filters, setFilters, view }: Props) {
   const [yMin, yMax] = meta.anos_range;
   const dirDisabled = view === "national";
 
+  // the endpoints a line connects depend on the current hierarchy level
+  const lineHelp =
+    view === "national"
+      ? "Cada linha liga o estado de residência do paciente ao estado onde fica o hospital. A espessura é proporcional ao número de internações."
+      : view === "state"
+        ? "Cada linha liga o município de residência ao município do hospital. Fluxos para fora do estado em foco aparecem agrupados no estado de destino. A espessura é proporcional ao número de internações."
+        : "Cada linha liga o município de residência ao município do hospital, para os fluxos que envolvem a cidade em foco. A espessura é proporcional ao número de internações.";
+
   return (
     <div className="panel controls">
       <h1>Fluxo de Internações</h1>
@@ -73,10 +82,8 @@ export default function Controls({ meta, filters, setFilters, view }: Props) {
           Mostrar linhas de fluxo
         </label>
         <Help wide>
-          Cada linha liga o município de residência do paciente (origem) ao
-          município do hospital (destino). A espessura é proporcional ao número
-          de internações. Desative para selecionar estados e cidades sem o ruído
-          das linhas; reative depois.
+          {lineHelp} Desative para selecionar estados e cidades sem o ruído das
+          linhas; reative quando quiser.
         </Help>
       </div>
 
@@ -179,7 +186,11 @@ export default function Controls({ meta, filters, setFilters, view }: Props) {
 
       <label>
         Cor dos estados
-        <Help wide>{METRIC_HELP[filters.metric]}</Help>
+        <Help wide>
+          Escolhe qual indicador pinta os estados no mapa. A descrição do
+          indicador selecionado aparece logo abaixo, e a legenda no canto
+          inferior esquerdo mostra a escala de cores correspondente.
+        </Help>
       </label>
       <select
         value={filters.metric}

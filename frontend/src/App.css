@@ -87,7 +87,7 @@
 }
 .controls label.check {
   margin: 0;
-  gap: 6px;
+  gap: 4px;
   font-size: 12.5px;
   color: #cfd3dc;
   text-transform: none;
@@ -121,6 +121,13 @@
 }
 .seg button {
   flex: 1;
+}
+.seg.small {
+  margin-bottom: 10px;
+}
+.seg.small button {
+  font-size: 11px;
+  padding: 5px 8px;
 }
 .seg button.on,
 .months button.on {

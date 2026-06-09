@@ -4,8 +4,17 @@ import { scaleDiverging, scaleSequential } from "d3-scale";
 import {
   interpolateRdBu,
   interpolateYlOrRd,
-  interpolateViridis,
+  interpolateBlues,
+  interpolateOranges,
+  interpolatePurples,
 } from "d3-scale-chromatic";
+
+// single-hue ramp (light = low, dark = high) per count/rate metric
+const SEQUENTIAL: Record<string, (t: number) => string> = {
+  recebidas: interpolateBlues,
+  exportadas: interpolateOranges,
+  recebidas_por_1k: interpolatePurples,
+};
 
 export type RGBA = [number, number, number, number];
 
@@ -35,12 +44,13 @@ export function buildColorScale(metric: string, values: number[]): ColorScale {
   const max = Math.max(...nums);
 
   if (metric === "saldo") {
-    // diverging around 0: red = exports more, blue = net attractor
+    // diverging around 0: blue = net attractor (polo), red = exports more.
+    // Matches the "Atração assistencial" chart (blue = positive saldo).
     const abs = Math.max(Math.abs(min), Math.abs(max)) || 1;
     const s = scaleDiverging<number, number>((t) => t).domain([-abs, 0, abs]);
     return {
       color: (v) =>
-        v == null ? [90, 90, 90, 100] : toRGBA(interpolateRdBu(1 - s(v))),
+        v == null ? [90, 90, 90, 100] : toRGBA(interpolateRdBu(s(v))),
       domain: [-abs, abs],
       diverging: true,
     };
@@ -55,8 +65,9 @@ export function buildColorScale(metric: string, values: number[]): ColorScale {
     };
   }
 
-  // sequential for counts / per-capita
-  const s = scaleSequential(interpolateViridis).domain([min, max || 1]);
+  // single-hue sequential ramp for counts / per-capita (light = low, dark = high)
+  const interp = SEQUENTIAL[metric] ?? interpolateBlues;
+  const s = scaleSequential(interp).domain([min, max || 1]);
   return {
     color: (v) => (v == null ? [90, 90, 90, 100] : toRGBA(s(v))),
     domain: [min, max],
