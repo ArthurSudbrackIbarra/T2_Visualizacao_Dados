@@ -69,23 +69,26 @@ Docs interativas em `/docs`. Estrutura: `main.py`, `config.py`, `db.py` (DuckDB 
 - [x] CORS liberado p/ Vite (localhost:5173); cache em memória (`lru_cache`) por combinação de filtros.
 - [x] Setup/reprodução documentado no `README.md` da raiz.
 
-## Fase 3 — Frontend React + deck.gl (3–5 dias) ⭐ onde está a nota
-- [ ] Mapa base MapLibre + deck.gl sobre o Brasil.
-- [ ] **`ArcLayer`** para fluxos: espessura/cor/altura ∝ volume; origem→destino.
-- [ ] **`GeoJsonLayer`** coroplético (saldo/exportação por UF/município).
-- [ ] **`ScatterplotLayer`** para nós (municípios-polo, raio ∝ recebidas).
-- [ ] **Interações exigidas pelo professor:**
-  - [ ] Filtros: especialidade (dropdown), ano + mês (slider/timeline com play sazonal),
-        complexidade, nível UF/município.
-  - [ ] **Drill-down**: clicar numa UF → recarrega fluxos município-a-município daquela região.
-  - [ ] **Clicar num nó/arco** → painel lateral com detalhes (top destinos, especialidades,
-        óbitos, dias de permanência, valor).
-  - [ ] **Hover tooltip** com números.
-  - [ ] Toggle de métrica do coroplético (saldo / taxa exportação / per capita).
-  - [ ] Timeline animada para mostrar sazonalidade (Q4).
-- [ ] Painéis auxiliares (Plotly/Recharts) ligados ao mapa (cross-filter): série temporal,
-      ranking de cidades-polo, barras por especialidade.
-- [ ] Estado/legenda claros; design responsivo o suficiente para a apresentação.
+## Fase 3 — Frontend React + deck.gl ⭐ FOUNDATION CONCLUÍDA (falta QA visual + polish)
+App rodando ponta-a-ponta (`cd frontend && npm install && npm run dev` → :5173, consome a API
+:8000). `npm run build` type-check limpo. Stack: React+TS+Vite, deck.gl, react-map-gl/maplibre,
+d3-scale(-chromatic), recharts. Basemap CARTO dark (sem token). Estrutura em `frontend/src/`:
+`config.ts, types.ts, api.ts, colors.ts, App.tsx, components/{MapView,Controls,InfoPanel,Legend}.tsx`.
+- [x] Mapa base MapLibre + deck.gl sobre o Brasil (pitch 3D).
+- [x] **`ArcLayer`** fluxos: largura ∝ √volume; origem (laranja) → destino (ciano); highlight.
+- [x] **`GeoJsonLayer`** coroplético de UF (cor pela métrica), join por sigla.
+- [x] **`ScatterplotLayer`** nós de município (raio ∝ internações), clicável.
+- [x] Filtros: especialidade (dropdown), ano (slider), mês (botões + **play sazonal**),
+      nível UF/município, métrica do coroplético.
+- [x] **Drill-down**: clicar numa UF → nível município filtrado àquela UF (+ botão voltar).
+- [x] **Clicar num nó/UF** → painel lateral: série mensal (Q4) + ranking de polos (Q3).
+- [x] **Hover tooltip** (arco: A→B + internações/óbitos; UF; município).
+- [x] Toggle de métrica (saldo / taxa exportação / recebidas / exportadas / per capita).
+- [x] Timeline animada de meses (sazonalidade, Q4).
+- [x] Painéis auxiliares (Recharts): linha residentes×migrantes; ranking em barras.
+- [x] Legenda dinâmica + dicas de interação.
+- [ ] **Pendente:** QA visual no navegador (não dá p/ screenshot WebGL headless aqui);
+      painel dedicado ao clicar num **arco**; polish responsivo; possíveis ajustes de escala de cor.
 
 ## Fase 4 — Insights & validação (1 dia)
 - [ ] Para cada pergunta (Q1–Q4), capturar um achado concreto + screenshot/gif a usar no artigo.

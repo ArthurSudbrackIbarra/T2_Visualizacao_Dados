@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# Frontend — Mapa interativo (React + deck.gl)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+App de visualização: mapa de fluxo de internações com arcos origem→destino, coroplético
+por UF, drill-down para município e painéis de análise (Q3 ranking, Q4 sazonalidade).
 
-Currently, two official plugins are available:
+## Rodar
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Pré-requisito: backend no ar em `http://localhost:8000` (ver `../README.md`).
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+nvm use          # opcional — usa Node 24 (.nvmrc)
+npm install      # 1x
+npm run dev      # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Para apontar para outra API: `VITE_API_BASE=http://host:porta/api npm run dev`.
+Build de produção: `npm run build` (saída em `dist/`).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Stack
+- **Vite + React + TypeScript**
+- **deck.gl** (`ArcLayer`, `GeoJsonLayer`, `ScatterplotLayer`) sobre **react-map-gl / MapLibre**
+  (basemap CARTO dark, sem token)
+- **d3-scale / d3-scale-chromatic** (escalas de cor) · **recharts** (gráficos dos painéis)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Estrutura (`src/`)
 ```
+config.ts        API_BASE, basemap, métricas, constantes
+types.ts         tipos espelhando as respostas da API
+api.ts           cliente fetch tipado
+colors.ts        escalas de cor por métrica (diverging/sequential) + cores dos arcos
+App.tsx          estado (filtros, seleção), orquestra fetch e compõe os componentes
+components/
+  MapView.tsx    DeckGL + MapLibre + camadas (arcos, coroplético, scatter) + tooltip
+  Controls.tsx   filtros: nível, especialidade, ano, mês (+ play sazonal), métrica
+  InfoPanel.tsx  Q4 (linha residentes x migrantes) + Q3 (ranking de polos)
+  Legend.tsx     legenda dinâmica da escala de cor
+public/geo/br-uf.geojson   malha das 27 UFs (coroplético)
+```
+
+## Interações
+- **Filtrar** por especialidade, ano, mês e métrica do coroplético.
+- **Play sazonal**: anima os meses do ano (responde Q4).
+- **Drill-down**: clicar num estado troca para nível município, filtrado àquela UF.
+- **Clicar** num estado/município → painel com sazonalidade e ranking de cidades-polo.
+- **Hover** nos arcos/nós → tooltip com números.
+- Arrastar = girar/inclinar · scroll = zoom.
