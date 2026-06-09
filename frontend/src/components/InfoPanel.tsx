@@ -4,36 +4,42 @@ import {
 } from "recharts";
 import { api } from "../api";
 import { MONTH_NAMES } from "../config";
-import type { Filters, Meta, RankingRow, TimePoint } from "../types";
-
-export interface Selection { level: "uf" | "munic"; id: number; name: string }
+import Help from "./Help";
+import type { Filters, Meta, Nav, RankingRow, TimePoint } from "../types";
 
 interface Props {
   meta: Meta;
   filters: Filters;
-  selection: Selection | null;
+  nav: Nav;
 }
 
-export default function InfoPanel({ meta, filters, selection }: Props) {
+export default function InfoPanel({ meta, filters, nav }: Props) {
   const [ranking, setRanking] = useState<RankingRow[]>([]);
   const [series, setSeries] = useState<TimePoint[]>([]);
 
-  // Q3 — polo cities, scoped to the drilled UF if any.
+  // the entity whose seasonality we chart: focused city, else selected state, else none
+  const seriesFocus = nav.city
+    ? { level: "munic" as const, id: nav.city.id, name: nav.city.name }
+    : nav.state
+      ? { level: "uf" as const, id: nav.state.cod, name: nav.state.name }
+      : null;
+
+  // Q3 — polo cities, scoped to the selected state when drilled in.
   useEffect(() => {
     api
-      .ranking({ year: filters.year, espec: filters.espec, uf: filters.drillUf, metric: "saldo", limit: 12 })
+      .ranking({ year: filters.year, espec: filters.espec, uf: nav.state?.cod ?? null, metric: "saldo", limit: 12 })
       .then(setRanking)
       .catch(() => setRanking([]));
-  }, [filters.year, filters.espec, filters.drillUf]);
+  }, [filters.year, filters.espec, nav.state?.cod]);
 
-  // Q4 — seasonality for the selected region (all months of the chosen year).
+  // Q4 — monthly residents vs incoming migrants for the focused entity.
   useEffect(() => {
-    if (!selection) { setSeries([]); return; }
+    if (!seriesFocus) { setSeries([]); return; }
     api
-      .timeseries({ level: selection.level, id: selection.id, espec: filters.espec, year: filters.year })
+      .timeseries({ level: seriesFocus.level, id: seriesFocus.id, espec: filters.espec, year: filters.year })
       .then(setSeries)
       .catch(() => setSeries([]));
-  }, [selection, filters.espec, filters.year]);
+  }, [seriesFocus?.level, seriesFocus?.id, filters.espec, filters.year]);
 
   const especName = filters.espec
     ? meta.especialidades.find((e) => e.id === filters.espec)?.nome
@@ -53,10 +59,16 @@ export default function InfoPanel({ meta, filters, selection }: Props) {
         <span className="badge">{filters.year}</span>
       </div>
 
-      {/* Q4 */}
       <section>
-        <h3>Sazonalidade {selection ? `· ${selection.name}` : ""}</h3>
-        {selection ? (
+        <h3>
+          Sazonalidade {seriesFocus ? `· ${seriesFocus.name}` : ""}
+          <Help wide>
+            Internações por mês no destino selecionado, separando moradores do próprio local
+            (Residentes) de pacientes vindos de fora (Migrantes). Útil para ver se os picos
+            sazonais são puxados por migração.
+          </Help>
+        </h3>
+        {seriesFocus ? (
           series.length ? (
             <ResponsiveContainer width="100%" height={170}>
               <LineChart data={chartData} margin={{ top: 5, right: 8, bottom: 0, left: -10 }}>
@@ -65,19 +77,24 @@ export default function InfoPanel({ meta, filters, selection }: Props) {
                 <YAxis tick={{ fontSize: 10, fill: "#aaa" }} width={48} />
                 <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #444", fontSize: 12 }} />
                 <RLegend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="Residentes" stroke="#28c8ff" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="Migrantes" stroke="#ffaa32" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="Residentes" stroke="#3cb4ff" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="Migrantes" stroke="#ff9628" dot={false} strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           ) : <p className="muted">Sem dados para esta seleção.</p>
         ) : (
-          <p className="muted">Clique num estado ou município no mapa para ver residentes × migrantes ao longo do ano.</p>
+          <p className="muted">Selecione um estado ou uma cidade no mapa para ver residentes e migrantes ao longo do ano.</p>
         )}
       </section>
 
-      {/* Q3 */}
       <section>
-        <h3>Cidades-polo {filters.drillUf ? "(na UF)" : "(Brasil)"} · maior atração</h3>
+        <h3>
+          Cidades-polo {nav.state ? `· ${nav.state.sigla}` : "· Brasil"}
+          <Help wide>
+            Municípios com maior saldo (recebidas menos residentes): os que mais "sustentam" a
+            internação de outras cidades. Barras azuis = atraem pacientes; vermelhas = exportam mais.
+          </Help>
+        </h3>
         <ol className="ranking">
           {ranking.map((r) => (
             <li key={r.id}>
@@ -86,7 +103,7 @@ export default function InfoPanel({ meta, filters, selection }: Props) {
                 <span className="rk-val">{r.saldo.toLocaleString("pt-BR")}</span>
               </div>
               <div className="rk-bar">
-                <i style={{ width: `${(Math.abs(r.saldo) / maxSaldo) * 100}%`, background: r.saldo >= 0 ? "#28c8ff" : "#ff6464" }} />
+                <i style={{ width: `${(Math.abs(r.saldo) / maxSaldo) * 100}%`, background: r.saldo >= 0 ? "#3cb4ff" : "#ff6464" }} />
               </div>
             </li>
           ))}

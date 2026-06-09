@@ -12,10 +12,12 @@ export interface Meta {
   anos_range: [number, number];
 }
 
+export type EntityKind = "uf" | "munic";
+
 export interface Flow {
-  o_id: number; o_name: string; o_lat: number; o_lon: number;
-  d_id: number; d_name: string; d_lat: number; d_lon: number;
-  count: number; obitos: number; val_tot: number; dias_perm: number;
+  o_id: number; o_kind: EntityKind; o_name: string; o_lat: number; o_lon: number;
+  d_id: number; d_kind: EntityKind; d_name: string; d_lat: number; d_lon: number;
+  count: number; obitos: number;
 }
 
 export interface NodeMetric {
@@ -39,13 +41,24 @@ export interface TimePoint {
   pct_migrantes: number | null;
 }
 
-export type Level = "uf" | "munic";
+// --- navigation hierarchy ---
+export type View = "national" | "state" | "city";
+export type Direction = "both" | "in" | "out";
+
+export interface Nav {
+  view: View;
+  state: { cod: number; sigla: string; name: string } | null;
+  city: { id: number; name: string } | null;
+}
+
+// the entity the direction filter / arc roles are relative to
+export interface Focus { kind: EntityKind; id: number }
 
 export interface Filters {
-  level: Level;
   year: number;
   month: number | null;
   espec: number | null;
   metric: string;
-  drillUf: number | null; // when drilled into a state (munic level)
+  direction: Direction;
+  showLines: boolean;
 }

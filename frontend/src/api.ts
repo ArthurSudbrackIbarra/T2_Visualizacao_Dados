@@ -18,8 +18,8 @@ export const api = {
   meta: () => get<Meta>("/meta"),
 
   flows: (p: {
-    level: string; year: number; month?: number | null;
-    espec?: number | null; uf?: number | null; limit?: number;
+    view: string; year: number; month?: number | null; espec?: number | null;
+    state?: number | null; city?: number | null; direction?: string; limit?: number;
   }) => get<Flow[]>("/flows", p),
 
   nodes: (p: { level: string; year: number; espec?: number | null; metric: string }) =>

@@ -87,8 +87,23 @@ d3-scale(-chromatic), recharts. Basemap CARTO dark (sem token). Estrutura em `fr
 - [x] Timeline animada de meses (sazonalidade, Q4).
 - [x] Painéis auxiliares (Recharts): linha residentes×migrantes; ranking em barras.
 - [x] Legenda dinâmica + dicas de interação.
+
+### Rework hierárquico (3 níveis) + correções de UX
+- [x] **Navegação hierárquica** com breadcrumb (Brasil › Estado › Cidade), revelando detalhe
+      progressivamente: nível 1 nacional (estado→estado), nível 2 estado (cidades do estado +
+      demais estados agregados como nó), nível 3 cidade (cidade→cidade país afora). Backend
+      `GET /flows?view=national|state|city` reescrito (agregação mista UF/município).
+- [x] **Filtro de direção** (Ambos / Chegando / Saindo) relativo à entidade em foco; cores
+      distintas (saindo = laranja, chegando = ciano).
+- [x] **Toggle mostrar/ocultar linhas** (selecionar sem o ruído dos arcos).
+- [x] **Highlight**: hover nos estados (autoHighlight); estado selecionado com borda âmbar;
+      cidade em foco com anel âmbar.
+- [x] **Tooltips desenhados** por hover (componente `Help`) explicando cada filtro, cores e
+      gráficos; tooltip do mapa estilizado.
+- [x] Especialidades: backend `/meta` retorna só as ~15 com dados, sem duplicatas.
+- [x] Sem emojis; escala de espessura normalizada por visão.
 - [ ] **Pendente:** QA visual no navegador (não dá p/ screenshot WebGL headless aqui);
-      painel dedicado ao clicar num **arco**; polish responsivo; possíveis ajustes de escala de cor.
+      eventual painel ao clicar num **arco**; polish responsivo; ajustes finos de cor/escala.
 
 ## Fase 4 — Insights & validação (1 dia)
 - [ ] Para cada pergunta (Q1–Q4), capturar um achado concreto + screenshot/gif a usar no artigo.
