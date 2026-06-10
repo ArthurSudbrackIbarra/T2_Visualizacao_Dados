@@ -83,7 +83,7 @@ def _ranking(
     direction_sql = "ASC" if order == "asc" else "DESC"
 
     sql = f"""
-        SELECT m.munic_id AS id, m.nome, m.uf, m.regiao_saude,
+        SELECT m.munic_id AS id, m.nome, m.uf, m.regiao_saude, m.lat, m.lon,
                SUM(f.internacoes_recebidas)  AS recebidas,
                SUM(f.internacoes_exportadas) AS exportadas,
                SUM(f.internacoes_residentes) AS residentes,
@@ -95,7 +95,7 @@ def _ranking(
         FROM fato_municipio_ano f
         JOIN dim_municipio m ON f.munic_id = m.munic_id
         WHERE {' AND '.join(where)}
-        GROUP BY m.munic_id, m.nome, m.uf, m.regiao_saude
+        GROUP BY m.munic_id, m.nome, m.uf, m.regiao_saude, m.lat, m.lon
         ORDER BY {order_expr} {direction_sql} NULLS LAST
         LIMIT ?
     """

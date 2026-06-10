@@ -10,7 +10,7 @@ import {
   Legend as RLegend,
 } from "recharts";
 import { api } from "../api";
-import { MONTH_NAMES } from "../config";
+import { MONTH_NAMES, UF_NAMES } from "../config";
 import Help from "./Help";
 import type {
   Filters,
@@ -26,6 +26,8 @@ interface Props {
   filters: Filters;
   nav: Nav;
   ufNodes: NodeMetric[];
+  onPickState: (cod: number, sigla: string, name: string) => void;
+  onPickCity: (id: number, name: string, lat: number, lon: number) => void;
 }
 
 interface RankItem {
@@ -33,9 +35,18 @@ interface RankItem {
   nome: string;
   uf: string;
   saldo: number;
+  lat: number;
+  lon: number;
 }
 
-export default function InfoPanel({ meta, filters, nav, ufNodes }: Props) {
+export default function InfoPanel({
+  meta,
+  filters,
+  nav,
+  ufNodes,
+  onPickState,
+  onPickCity,
+}: Props) {
   const [ranking, setRanking] = useState<RankingRow[]>([]);
   const [series, setSeries] = useState<TimePoint[]>([]);
   // "desc" = most attract patients; "asc" = most dependent on others
@@ -95,13 +106,32 @@ export default function InfoPanel({ meta, filters, nav, ufNodes }: Props) {
 
   // unified ranking list: states (from ufNodes) nationally, municipalities within a state
   const rankItems: RankItem[] = rankingByState
-    ? ranking.map((r) => ({ id: r.id, nome: r.nome, uf: r.uf, saldo: r.saldo }))
+    ? ranking.map((r) => ({
+        id: r.id,
+        nome: r.nome,
+        uf: r.uf,
+        saldo: r.saldo,
+        lat: r.lat,
+        lon: r.lon,
+      }))
     : ufNodes
-        .map((n) => ({ id: n.id, nome: n.uf, uf: "", saldo: n.saldo }))
+        .map((n) => ({
+          id: n.id,
+          nome: n.uf,
+          uf: "",
+          saldo: n.saldo,
+          lat: n.lat,
+          lon: n.lon,
+        }))
         .sort((a, b) =>
           rankOrder === "desc" ? b.saldo - a.saldo : a.saldo - b.saldo,
         )
         .slice(0, 12);
+
+  const handlePick = (r: RankItem) => {
+    if (rankingByState) onPickCity(r.id, r.nome, r.lat, r.lon);
+    else onPickState(r.id, r.nome, UF_NAMES[r.nome] ?? r.nome);
+  };
 
   const maxSaldo = Math.max(1, ...rankItems.map((r) => Math.abs(r.saldo)));
   const chartData = series.map((p) => ({
@@ -203,7 +233,12 @@ export default function InfoPanel({ meta, filters, nav, ufNodes }: Props) {
         </div>
         <ol className="ranking">
           {rankItems.map((r) => (
-            <li key={r.id}>
+            <li
+              key={r.id}
+              className="rk-item"
+              onClick={() => handlePick(r)}
+              title={`Ver ${r.nome} no mapa`}
+            >
               <div className="rk-row">
                 <span className="rk-name">
                   {r.nome} {r.uf && <em>{r.uf}</em>}

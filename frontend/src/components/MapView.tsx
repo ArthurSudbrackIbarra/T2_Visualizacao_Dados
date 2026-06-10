@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DeckGL from "@deck.gl/react";
+import { FlyToInterpolator } from "@deck.gl/core";
 import { ArcLayer, GeoJsonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { Map } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -33,7 +34,9 @@ interface Props {
   colorScale: ColorScale;
   cityNodes: CityNode[];
   onPickState: (cod: number, sigla: string, name: string) => void;
-  onPickCity: (id: number, name: string) => void;
+  onPickCity: (id: number, name: string, lat: number, lon: number) => void;
+  fly: { longitude: number; latitude: number; zoom: number } | null;
+  flyToken: number;
 }
 
 type Role = "out" | "in" | "internal" | "none";
@@ -48,10 +51,27 @@ export default function MapView({
   cityNodes,
   onPickState,
   onPickCity,
+  fly,
+  flyToken,
 }: Props) {
   const view = nav.view;
   const selectedSigla = nav.state?.sigla ?? null;
   const focusCityId = nav.city?.id ?? null;
+
+  // controlled camera so we can fly to an entity selected from the panel or the map
+  const [viewState, setViewState] = useState<any>(INITIAL_VIEW_STATE);
+  useEffect(() => {
+    if (!fly) return;
+    setViewState((vs: any) => ({
+      ...vs,
+      longitude: fly.longitude,
+      latitude: fly.latitude,
+      zoom: fly.zoom,
+      transitionDuration: 900,
+      transitionInterpolator: new FlyToInterpolator({ speed: 1.4 }),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flyToken]);
 
   const maxCount = useMemo(
     () => Math.max(1, ...flows.map((f) => f.count)),
@@ -167,7 +187,13 @@ export default function MapView({
         autoHighlight: true,
         highlightColor: [255, 255, 255, 120],
         onClick: (info: any) =>
-          info.object && onPickCity(info.object.id, info.object.name),
+          info.object &&
+          onPickCity(
+            info.object.id,
+            info.object.name,
+            info.object.lat,
+            info.object.lon,
+          ),
         updateTriggers: {
           getFillColor: [focusCityId],
           getLineColor: [focusCityId],
@@ -178,7 +204,8 @@ export default function MapView({
 
   return (
     <DeckGL
-      initialViewState={INITIAL_VIEW_STATE}
+      viewState={viewState}
+      onViewStateChange={({ viewState: vs }: any) => setViewState(vs)}
       controller={true}
       layers={layers as any}
       getTooltip={getTooltip}

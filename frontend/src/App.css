@@ -262,6 +262,15 @@
 .ranking li {
   margin-bottom: 8px;
 }
+.ranking li.rk-item {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px 4px;
+  border-radius: 6px;
+}
+.ranking li.rk-item:hover {
+  background: #20242e;
+}
 .rk-row {
   display: flex;
   justify-content: space-between;

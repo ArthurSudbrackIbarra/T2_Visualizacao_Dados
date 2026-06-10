@@ -5,6 +5,7 @@ import InfoPanel from "./components/InfoPanel";
 import Legend from "./components/Legend";
 import Breadcrumb from "./components/Breadcrumb";
 import { api } from "./api";
+import { INITIAL_VIEW_STATE } from "./config";
 import { buildColorScale } from "./colors";
 import type {
   Filters,
@@ -30,6 +31,17 @@ export default function App() {
   const [flows, setFlows] = useState<Flow[]>([]);
   const [ufNodes, setUfNodes] = useState<NodeMetric[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // camera fly-to target (changing flyToken triggers the animation in MapView)
+  const [fly, setFly] = useState<{
+    longitude: number;
+    latitude: number;
+    zoom: number;
+  } | null>(null);
+  const [flyToken, setFlyToken] = useState(0);
+  const flyTo = (longitude: number, latitude: number, zoom: number) => {
+    setFly({ longitude, latitude, zoom });
+    setFlyToken((t) => t + 1);
+  };
 
   // load meta once
   useEffect(() => {
@@ -149,12 +161,30 @@ export default function App() {
     return [...m.values()];
   }, [flows, nav.view]);
 
+  // Selection handlers shared by the map and the right-panel ranking.
+  const selectState = (cod: number, sigla: string, name: string) => {
+    setNav({ view: "state", state: { cod, sigla, name }, city: null });
+    const u = meta?.ufs.find((x) => x.cod === cod);
+    if (u) flyTo(u.lon, u.lat, 5.6);
+  };
+  const selectCity = (id: number, name: string, lat: number, lon: number) => {
+    setNav((n) => ({ ...n, view: "city", city: { id, name } }));
+    flyTo(lon, lat, 8);
+  };
+
   const navigate = (view: View) => {
     if (view === "national") {
       setNav({ view: "national", state: null, city: null });
       setFilters((f) => (f ? { ...f, direction: "both" } : f));
+      flyTo(
+        INITIAL_VIEW_STATE.longitude,
+        INITIAL_VIEW_STATE.latitude,
+        INITIAL_VIEW_STATE.zoom,
+      );
     } else if (view === "state") {
       setNav({ ...nav, view: "state", city: null });
+      const u = meta?.ufs.find((x) => x.cod === nav.state?.cod);
+      if (u) flyTo(u.lon, u.lat, 5.6);
     }
   };
 
@@ -181,15 +211,10 @@ export default function App() {
         geojsonValueBySigla={valueBySigla}
         colorScale={colorScale}
         cityNodes={cityNodes}
-        onPickState={(cod, sigla, name) => {
-          setNav({ view: "state", state: { cod, sigla, name }, city: null });
-          if (filters.direction === "in" || filters.direction === "out") {
-            // keep direction; now meaningful at state level
-          }
-        }}
-        onPickCity={(id, name) =>
-          setNav((n) => ({ ...n, view: "city", city: { id, name } }))
-        }
+        onPickState={selectState}
+        onPickCity={selectCity}
+        fly={fly}
+        flyToken={flyToken}
       />
 
       <Breadcrumb nav={nav} onNavigate={navigate} />
@@ -199,7 +224,14 @@ export default function App() {
         setFilters={setFilters}
         view={nav.view}
       />
-      <InfoPanel meta={meta} filters={filters} nav={nav} ufNodes={ufNodes} />
+      <InfoPanel
+        meta={meta}
+        filters={filters}
+        nav={nav}
+        ufNodes={ufNodes}
+        onPickState={selectState}
+        onPickCity={selectCity}
+      />
       <Legend
         metric={filters.metric}
         scale={colorScale}

@@ -63,6 +63,8 @@ export interface RankingRow {
   nome: string;
   uf: string;
   regiao_saude: string;
+  lat: number;
+  lon: number;
   recebidas: number;
   exportadas: number;
   residentes: number;
