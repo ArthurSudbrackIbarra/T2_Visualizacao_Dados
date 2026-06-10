@@ -40,19 +40,19 @@ export default function Legend({ metric, scale, view, showLines }: Props) {
           {view === "national" ? (
             <>
               <span>
-                <i style={{ background: "rgb(255,170,50)" }} /> origem
+                <i style={{ background: "rgb(255,170,50)" }} /> Origem
               </span>
               <span>
-                <i style={{ background: "rgb(40,200,255)" }} /> destino
+                <i style={{ background: "rgb(40,200,255)" }} /> Destino
               </span>
             </>
           ) : (
             <>
               <span>
-                <i style={{ background: "rgb(255,150,40)" }} /> saindo
+                <i style={{ background: "rgb(255,150,40)" }} /> Saindo
               </span>
               <span>
-                <i style={{ background: "rgb(60,180,255)" }} /> chegando
+                <i style={{ background: "rgb(60,180,255)" }} /> Chegando
               </span>
             </>
           )}

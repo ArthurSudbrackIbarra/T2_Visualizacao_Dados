@@ -149,14 +149,14 @@ export default function InfoPanel({ meta, filters, nav, ufNodes }: Props) {
                 <RLegend wrapperStyle={{ fontSize: 11 }} />
                 <Line
                   type="monotone"
-                  dataKey="residentes"
+                  dataKey="Residentes"
                   stroke="#3cb4ff"
                   dot={false}
                   strokeWidth={2}
                 />
                 <Line
                   type="monotone"
-                  dataKey="migrantes"
+                  dataKey="Migrantes"
                   stroke="#ff9628"
                   dot={false}
                   strokeWidth={2}
