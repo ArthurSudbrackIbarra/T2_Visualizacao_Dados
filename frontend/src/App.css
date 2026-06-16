@@ -78,27 +78,15 @@
 
 .year-range {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.yr-row {
-  display: flex;
   align-items: center;
   gap: 8px;
 }
-.yr-row span {
-  width: 28px;
-  font-size: 11px;
-  color: #9aa0ad;
-}
-.yr-row input[type="range"] {
+.year-range select {
   flex: 1;
 }
-.yr-row b {
-  width: 34px;
-  text-align: right;
-  font-size: 12px;
-  color: #e8e8ea;
+.yr-sep {
+  font-size: 11px;
+  color: #9aa0ad;
 }
 
 /* subtle checkbox rows (override the uppercase section-label style) */
@@ -177,7 +165,7 @@
 .months {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
+  gap: 6px;
   margin-top: 4px;
 }
 .months button {
@@ -441,4 +429,9 @@
 .deck-tt .tt-row {
   color: #aab0bd;
   font-size: 11.5px;
+}
+.deck-tt .tt-sep {
+  height: 1px;
+  background: #3a3f4c;
+  margin: 6px 0;
 }

@@ -16,7 +16,7 @@ import {
   withAlpha,
   type ColorScale,
 } from "../colors";
-import type { Flow, Focus, Nav } from "../types";
+import type { Flow, Focus, Nav, NodeMetric } from "../types";
 
 export interface CityNode {
   id: number;
@@ -34,6 +34,8 @@ interface Props {
   geojsonValueBySigla: Map<string, number | null>;
   colorScale: ColorScale;
   cityNodes: CityNode[];
+  ufMetrics: Map<string, NodeMetric>;
+  cityMetrics: Map<number, NodeMetric>;
   onPickState: (cod: number, sigla: string, name: string) => void;
   onPickCity: (id: number, name: string, lat: number, lon: number) => void;
   fly: { longitude: number; latitude: number; zoom: number } | null;
@@ -50,6 +52,8 @@ export default function MapView({
   geojsonValueBySigla,
   colorScale,
   cityNodes,
+  ufMetrics,
+  cityMetrics,
   onPickState,
   onPickCity,
   fly,
@@ -231,6 +235,39 @@ export default function MapView({
       }),
   ].filter(Boolean);
 
+  const getTooltip = ({ object, layer }: any) => {
+    if (!object) return null;
+    if (layer?.id === "flows") {
+      return {
+        html:
+          `<div class="tt-title">${object.o_name} → ${object.d_name}</div>` +
+          `<div class="tt-row">Pacientes: <b>${object.count.toLocaleString("pt-BR")}</b></div>` +
+          `<div class="tt-row">Óbitos: ${object.obitos.toLocaleString("pt-BR")}</div>`,
+        className: "deck-tt",
+      };
+    }
+    if (layer?.id === "uf") {
+      const m = ufMetrics.get(object.properties.sigla);
+      return {
+        html:
+          `<div class="tt-title">${object.properties.name}</div>` +
+          metricRows(m),
+        className: "deck-tt",
+      };
+    }
+    if (layer?.id === "cities") {
+      const m = cityMetrics.get(object.id);
+      return {
+        html:
+          `<div class="tt-title">${object.name}</div>` +
+          `<div class="tt-row">${object.total.toLocaleString("pt-BR")} internações no fluxo</div>` +
+          metricRows(m),
+        className: "deck-tt",
+      };
+    }
+    return null;
+  };
+
   return (
     <DeckGL
       viewState={viewState}
@@ -247,30 +284,26 @@ export default function MapView({
   );
 }
 
-function getTooltip({ object, layer }: any) {
-  if (!object) return null;
-  if (layer?.id === "flows") {
-    return {
-      html:
-        `<div class="tt-title">${object.o_name} → ${object.d_name}</div>` +
-        `<div class="tt-row">Pacientes: <b>${object.count.toLocaleString("pt-BR")}</b></div>` +
-        `<div class="tt-row">Óbitos: ${object.obitos.toLocaleString("pt-BR")}</div>`,
-      className: "deck-tt",
-    };
-  }
-  if (layer?.id === "uf") {
-    return {
-      html: `<div class="tt-title">${object.properties.name}</div>`,
-      className: "deck-tt",
-    };
-  }
-  if (layer?.id === "cities") {
-    return {
-      html:
-        `<div class="tt-title">${object.name}</div>` +
-        `<div class="tt-row">${object.total.toLocaleString("pt-BR")} internações no fluxo</div>`,
-      className: "deck-tt",
-    };
-  }
-  return null;
+// received / exported / residents / net attraction / export rate, for the hover card
+function metricRows(m?: NodeMetric): string {
+  if (!m) return "";
+  const n = (x: unknown) => Number(x ?? 0).toLocaleString("pt-BR");
+  const raw: any = m.taxa_exportacao;
+  const taxa =
+    typeof raw === "number"
+      ? raw
+      : raw && typeof raw === "object"
+        ? Number(raw.parsedValue)
+        : null;
+  const pct = taxa == null || isNaN(taxa) ? "—" : `${Math.round(taxa * 100)}%`;
+  const saldo = Number(m.saldo ?? 0);
+  const saldoStr = (saldo > 0 ? "+" : "") + saldo.toLocaleString("pt-BR");
+  return (
+    `<div class="tt-sep"></div>` +
+    `<div class="tt-row">Recebidas: <b>${n(m.recebidas)}</b></div>` +
+    `<div class="tt-row">Exportadas: <b>${n(m.exportadas)}</b></div>` +
+    `<div class="tt-row">Residentes: <b>${n(m.residentes)}</b></div>` +
+    `<div class="tt-row">Atração (saldo): <b>${saldoStr}</b></div>` +
+    `<div class="tt-row">Taxa de exportação: <b>${pct}</b></div>`
+  );
 }

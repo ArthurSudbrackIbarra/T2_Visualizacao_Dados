@@ -39,6 +39,7 @@ export const api = {
     month?: number | null;
     espec?: number | null;
     metric: string;
+    uf?: number | null;
   }) => get<NodeMetric[]>("/nodes", p),
 
   ranking: (p: {

@@ -38,6 +38,7 @@ def _nodes(
     month: int | None,
     espec: int | None,
     metric: str,
+    uf: int | None = None,
 ) -> list[dict]:
     # Built on fato_municipio_mes so the choropleth honors a year range and an
     # optional month; summed over all months it equals the annual table.
@@ -79,6 +80,11 @@ def _nodes(
         """
         params = fparams
     else:  # munic
+        munic_where = where
+        munic_params = list(fparams)
+        if uf is not None:
+            munic_where += " AND (f.munic_id // 10000) = ?"
+            munic_params.append(uf)
         sql = f"""
             SELECT m.munic_id AS id, m.nome AS name, m.lat, m.lon, m.uf,
                    m.regiao_saude,
@@ -90,10 +96,10 @@ def _nodes(
                    MAX(f.leitos_sus)             AS leitos_sus
             FROM fato_municipio_mes f
             JOIN dim_municipio m ON f.munic_id = m.munic_id
-            WHERE {where}
+            WHERE {munic_where}
             GROUP BY m.munic_id, m.nome, m.lat, m.lon, m.uf, m.regiao_saude
         """
-        params = fparams
+        params = munic_params
 
     rows = db.query(sql, params)
     for r in rows:
@@ -111,8 +117,11 @@ def nodes(
     month: int | None = Query(None, ge=1, le=12),
     espec: int | None = None,
     metric: str = Query("saldo"),
+    uf: int | None = Query(
+        None, description="restringe municípios a uma UF (level=munic)"
+    ),
 ) -> list[dict]:
     if metric not in _METRICS:
         metric = "saldo"
     lo, hi = (year_min, year_max) if year_min <= year_max else (year_max, year_min)
-    return _nodes(level, lo, hi, month, espec, metric)
+    return _nodes(level, lo, hi, month, espec, metric, uf)

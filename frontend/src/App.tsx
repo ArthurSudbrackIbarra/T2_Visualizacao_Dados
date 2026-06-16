@@ -31,6 +31,8 @@ export default function App() {
   });
   const [flows, setFlows] = useState<Flow[]>([]);
   const [ufNodes, setUfNodes] = useState<NodeMetric[]>([]);
+  // per-município metrics for the selected state — powers the city hover tooltip
+  const [municNodes, setMunicNodes] = useState<NodeMetric[]>([]);
   const [error, setError] = useState<string | null>(null);
   // camera fly-to target (changing flyToken triggers the animation in MapView)
   const [fly, setFly] = useState<{
@@ -143,11 +145,50 @@ export default function App() {
     filters?.direction,
   ]);
 
+  // municipality metrics for the selected state (for the city hover tooltip)
+  useEffect(() => {
+    if (!filters || nav.view === "national" || nav.state == null) {
+      setMunicNodes([]);
+      return;
+    }
+    api
+      .nodes({
+        level: "munic",
+        year_min: filters.yearStart,
+        year_max: filters.yearEnd,
+        month: filters.month,
+        espec: filters.espec,
+        metric: filters.metric,
+        uf: nav.state.cod,
+      })
+      .then(setMunicNodes)
+      .catch(() => setMunicNodes([]));
+  }, [
+    nav.view,
+    nav.state?.cod,
+    filters?.yearStart,
+    filters?.yearEnd,
+    filters?.month,
+    filters?.espec,
+  ]);
+
   const valueBySigla = useMemo(() => {
     const m = new Map<string, number | null>();
     ufNodes.forEach((n) => m.set(n.uf, n.value));
     return m;
   }, [ufNodes]);
+
+  // hover-tooltip lookups: state metrics by sigla, município metrics by id
+  const ufMetricsBySigla = useMemo(() => {
+    const m = new Map<string, NodeMetric>();
+    ufNodes.forEach((n) => m.set(n.uf, n));
+    return m;
+  }, [ufNodes]);
+  const municMetricsById = useMemo(() => {
+    const m = new Map<number, NodeMetric>();
+    municNodes.forEach((n) => m.set(n.id, n));
+    return m;
+  }, [municNodes]);
 
   const colorScale = useMemo(
     () =>
@@ -245,6 +286,8 @@ export default function App() {
         geojsonValueBySigla={valueBySigla}
         colorScale={colorScale}
         cityNodes={cityNodes}
+        ufMetrics={ufMetricsBySigla}
+        cityMetrics={municMetricsById}
         onPickState={selectState}
         onPickCity={selectCity}
         fly={fly}

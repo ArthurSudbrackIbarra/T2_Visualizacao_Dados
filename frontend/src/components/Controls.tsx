@@ -55,6 +55,7 @@ export default function Controls({ meta, filters, setFilters, view }: Props) {
 
   const set = (patch: Partial<Filters>) => setFilters({ ...filters, ...patch });
   const [yMin, yMax] = meta.anos_range;
+  const years = Array.from({ length: yMax - yMin + 1 }, (_, i) => yMin + i);
   const dirDisabled = view === "national";
 
   // the endpoints a line connects depend on the current hierarchy level
@@ -146,34 +147,33 @@ export default function Controls({ meta, filters, setFilters, view }: Props) {
         </Help>
       </label>
       <div className="year-range">
-        <div className="yr-row">
-          <span>De</span>
-          <input
-            type="range"
-            min={yMin}
-            max={yMax}
-            value={filters.yearStart}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              set({ yearStart: v, yearEnd: Math.max(v, filters.yearEnd) });
-            }}
-          />
-          <b>{filters.yearStart}</b>
-        </div>
-        <div className="yr-row">
-          <span>Até</span>
-          <input
-            type="range"
-            min={yMin}
-            max={yMax}
-            value={filters.yearEnd}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              set({ yearEnd: v, yearStart: Math.min(v, filters.yearStart) });
-            }}
-          />
-          <b>{filters.yearEnd}</b>
-        </div>
+        <select
+          value={filters.yearStart}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            set({ yearStart: v, yearEnd: Math.max(v, filters.yearEnd) });
+          }}
+        >
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
+        <span className="yr-sep">até</span>
+        <select
+          value={filters.yearEnd}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            set({ yearEnd: v, yearStart: Math.min(v, filters.yearStart) });
+          }}
+        >
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
       </div>
 
       <label>
