@@ -26,9 +26,11 @@ from .. import db
 router = APIRouter()
 
 
-def _base_filters(year: int, month: int | None, espec: int | None) -> tuple[list[str], list]:
-    where = ["f.ano = ?"]
-    params: list = [year]
+def _base_filters(
+    year_min: int, year_max: int, month: int | None, espec: int | None
+) -> tuple[list[str], list]:
+    where = ["f.ano BETWEEN ? AND ?"]
+    params: list = [year_min, year_max]
     if month is not None:
         where.append("f.mes = ?")
         params.append(month)
@@ -39,8 +41,8 @@ def _base_filters(year: int, month: int | None, espec: int | None) -> tuple[list
 
 
 @lru_cache(maxsize=512)
-def _national(year, month, espec, direction, focus, limit) -> list[dict]:
-    where, params = _base_filters(year, month, espec)
+def _national(year_min, year_max, month, espec, direction, focus, limit) -> list[dict]:
+    where, params = _base_filters(year_min, year_max, month, espec)
     where.append("f.uf_orig <> f.uf_dest")
     if focus is not None and direction in ("out", "in"):
         where.append(f"f.{'uf_orig' if direction == 'out' else 'uf_dest'} = ?")
@@ -62,9 +64,9 @@ def _national(year, month, espec, direction, focus, limit) -> list[dict]:
 
 
 @lru_cache(maxsize=512)
-def _state(state, year, month, espec, direction, limit) -> list[dict]:
+def _state(state, year_min, year_max, month, espec, direction, limit) -> list[dict]:
     s = int(state)  # inlined into CASE (safe int); filters/direction stay parameterized
-    where, params = _base_filters(year, month, espec)
+    where, params = _base_filters(year_min, year_max, month, espec)
     if direction == "out":
         where.append("f.uf_orig = ?")
         params.append(s)
@@ -114,8 +116,8 @@ def _state(state, year, month, espec, direction, limit) -> list[dict]:
 
 
 @lru_cache(maxsize=512)
-def _city(city, year, month, espec, direction, limit) -> list[dict]:
-    where, params = _base_filters(year, month, espec)
+def _city(city, year_min, year_max, month, espec, direction, limit) -> list[dict]:
+    where, params = _base_filters(year_min, year_max, month, espec)
     where.append("f.munic_orig <> f.munic_dest")
     where.append("mo.lat IS NOT NULL")
     where.append("md.lat IS NOT NULL")
@@ -149,14 +151,16 @@ def flows(
     view: str = Query("national", pattern="^(national|state|city)$"),
     state: int | None = Query(None, description="UF foco (state view; e direção no national)"),
     city: int | None = Query(None, description="município foco (city view)"),
-    year: int = Query(..., ge=2008, le=2023),
+    year_min: int = Query(..., ge=2008, le=2023),
+    year_max: int = Query(..., ge=2008, le=2023),
     month: int | None = Query(None, ge=1, le=12),
     espec: int | None = None,
     direction: str = Query("both", pattern="^(both|in|out)$"),
     limit: int = Query(700, ge=1, le=5000),
 ) -> list[dict]:
+    lo, hi = (year_min, year_max) if year_min <= year_max else (year_max, year_min)
     if view == "city" and city is not None:
-        return _city(city, year, month, espec, direction, limit)
+        return _city(city, lo, hi, month, espec, direction, limit)
     if view == "state" and state is not None:
-        return _state(state, year, month, espec, direction, limit)
-    return _national(year, month, espec, direction, state, limit)
+        return _state(state, lo, hi, month, espec, direction, limit)
+    return _national(lo, hi, month, espec, direction, state, limit)

@@ -75,6 +75,15 @@ export function buildColorScale(metric: string, values: number[]): ColorScale {
   };
 }
 
+// Constant dark scrim drawn over the basemap in EVERY view so the flow arcs always
+// pop (previously the scene only darkened once a state was selected). States are
+// rendered opaque on top of this scrim with their true choropleth color, so the color
+// on the map equals the legend; the legend swatches are dimmed by SCRIM_K to keep both
+// in perfect agreement. Tune SCRIM_ALPHA (0–255) to make the whole scene darker/lighter.
+export const SCRIM_ALPHA = 130;
+export const SCRIM_FILL: RGBA = [0, 0, 0, SCRIM_ALPHA];
+export const SCRIM_K = 1 - SCRIM_ALPHA / 255; // brightness left after the scrim
+
 export const ARC_SOURCE: RGBA = [255, 170, 50, 200]; // origin (orange)
 export const ARC_TARGET: RGBA = [40, 200, 255, 200]; // destination (cyan)
 
@@ -82,7 +91,7 @@ export const ARC_TARGET: RGBA = [40, 200, 255, 200]; // destination (cyan)
 export const ARC_OUT: RGBA = [255, 150, 40, 235]; // leaving the focus (warm)
 export const ARC_IN: RGBA = [60, 180, 255, 235]; // arriving at the focus (cool)
 
-// selection highlight (amber) — used for selected state border & focused city ring
+// selection highlight (amber) — used for selected-state & hover borders, focused city ring
 export const HILITE: RGBA = [255, 205, 60, 255];
 
 export function withAlpha(c: RGBA, a: number): RGBA {

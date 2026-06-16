@@ -89,7 +89,9 @@ export type Direction = "both" | "in" | "out";
 export interface Nav {
   view: View;
   state: { cod: number; sigla: string; name: string } | null;
-  city: { id: number; name: string } | null;
+  // lat/lon are optional: present when selected on the map (used to restore the
+  // camera from a shared URL), absent for older selections.
+  city: { id: number; name: string; lat?: number; lon?: number } | null;
 }
 
 // the entity the direction filter / arc roles are relative to
@@ -99,7 +101,9 @@ export interface Focus {
 }
 
 export interface Filters {
-  year: number;
+  // inclusive year range; yearStart === yearEnd means a single year
+  yearStart: number;
+  yearEnd: number;
   month: number | null;
   espec: number | null;
   metric: string;

@@ -72,7 +72,9 @@ export default function InfoPanel({
     }
     api
       .ranking({
-        year: filters.year,
+        year_min: filters.yearStart,
+        year_max: filters.yearEnd,
+        month: filters.month,
         espec: filters.espec,
         uf: nav.state!.cod,
         metric: "saldo",
@@ -81,7 +83,15 @@ export default function InfoPanel({
       })
       .then(setRanking)
       .catch(() => setRanking([]));
-  }, [filters.year, filters.espec, nav.state?.cod, rankOrder, rankingByState]);
+  }, [
+    filters.yearStart,
+    filters.yearEnd,
+    filters.month,
+    filters.espec,
+    nav.state?.cod,
+    rankOrder,
+    rankingByState,
+  ]);
 
   // Q4 — monthly residents vs incoming migrants for the focused entity.
   useEffect(() => {
@@ -94,11 +104,18 @@ export default function InfoPanel({
         level: seriesFocus.level,
         id: seriesFocus.id,
         espec: filters.espec,
-        year: filters.year,
+        year_min: filters.yearStart,
+        year_max: filters.yearEnd,
       })
       .then(setSeries)
       .catch(() => setSeries([]));
-  }, [seriesFocus?.level, seriesFocus?.id, filters.espec, filters.year]);
+  }, [
+    seriesFocus?.level,
+    seriesFocus?.id,
+    filters.espec,
+    filters.yearStart,
+    filters.yearEnd,
+  ]);
 
   const especName = filters.espec
     ? meta.especialidades.find((e) => e.id === filters.espec)?.nome
@@ -144,7 +161,11 @@ export default function InfoPanel({
     <div className="panel info">
       <div className="info-head">
         <h2>{especName}</h2>
-        <span className="badge">{filters.year}</span>
+        <span className="badge">
+          {filters.yearStart === filters.yearEnd
+            ? filters.yearStart
+            : `${filters.yearStart}–${filters.yearEnd}`}
+        </span>
       </div>
 
       <section>

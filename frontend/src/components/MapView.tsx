@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "@deck.gl/core";
-import { ArcLayer, GeoJsonLayer, ScatterplotLayer } from "@deck.gl/layers";
+import {
+  ArcLayer,
+  GeoJsonLayer,
+  ScatterplotLayer,
+  SolidPolygonLayer,
+} from "@deck.gl/layers";
 import { Map } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -12,10 +17,19 @@ import {
   ARC_SOURCE,
   ARC_TARGET,
   HILITE,
+  SCRIM_FILL,
   withAlpha,
   type ColorScale,
 } from "../colors";
 import type { Flow, Focus, Nav } from "../types";
+
+// A world-spanning quad used as the constant dark scrim under the arcs.
+const SCRIM_POLY = [
+  [-180, -80],
+  [180, -80],
+  [180, 84],
+  [-180, 84],
+];
 
 export interface CityNode {
   id: number;
@@ -57,6 +71,8 @@ export default function MapView({
   const view = nav.view;
   const selectedSigla = nav.state?.sigla ?? null;
   const focusCityId = nav.city?.id ?? null;
+  // state currently under the cursor — drives the bright yellow hover outline
+  const [hoverSigla, setHoverSigla] = useState<string | null>(null);
 
   // controlled camera so we can fly to an entity selected from the panel or the map
   const [viewState, setViewState] = useState<any>(INITIAL_VIEW_STATE);
@@ -108,16 +124,31 @@ export default function MapView({
       getFillColor: (f: any) => {
         const v = geojsonValueBySigla.get(f.properties.sigla) ?? null;
         const c = colorScale.color(v);
-        const alpha = view === "national" ? 175 : view === "state" ? 70 : 45;
-        return [c[0], c[1], c[2], alpha];
+        // Opaque in every view so the rendered color matches the legend exactly;
+        // the constant scrim below the arcs (not a per-view alpha) supplies the
+        // darkening. States with no data stay faint.
+        return [c[0], c[1], c[2], v == null ? 60 : 255];
       },
-      getLineColor: (f: any) =>
-        f.properties.sigla === selectedSigla ? HILITE : [200, 210, 225, 90],
-      getLineWidth: (f: any) => (f.properties.sigla === selectedSigla ? 3 : 1),
+      getLineColor: (f: any) => {
+        const sig = f.properties.sigla;
+        // Hover uses the same amber as the selected-state border (HILITE) for
+        // consistency; the thicker width distinguishes hover from selection.
+        if (view !== "city" && sig === hoverSigla) return HILITE;
+        if (sig === selectedSigla) return HILITE;
+        return [200, 210, 225, 90];
+      },
+      getLineWidth: (f: any) => {
+        const sig = f.properties.sigla;
+        if (view !== "city" && sig === hoverSigla) return 4;
+        if (sig === selectedSigla) return 3;
+        return 1;
+      },
       lineWidthUnits: "pixels",
       pickable: view !== "city",
-      autoHighlight: view !== "city",
-      highlightColor: [255, 255, 255, 45],
+      // Hover feedback is the vivid yellow border (getLineColor), not a fill tint.
+      autoHighlight: false,
+      onHover: (info: any) =>
+        setHoverSigla(info.object ? info.object.properties.sigla : null),
       onClick: (info: any) =>
         info.object &&
         onPickState(
@@ -126,10 +157,23 @@ export default function MapView({
           info.object.properties.name,
         ),
       updateTriggers: {
-        getFillColor: [geojsonValueBySigla, colorScale, view],
-        getLineColor: [selectedSigla],
-        getLineWidth: [selectedSigla],
+        getFillColor: [geojsonValueBySigla, colorScale],
+        getLineColor: [selectedSigla, hoverSigla, view],
+        getLineWidth: [selectedSigla, hoverSigla, view],
       },
+    }),
+
+    // Constant dark scrim over the basemap + states (under the arcs) — keeps the
+    // scene dark in every view so flows are always easy to read. Not pickable, so
+    // state clicks pass straight through to the polygons below.
+    new SolidPolygonLayer({
+      id: "scrim",
+      data: [SCRIM_POLY],
+      getPolygon: (d: any) => d,
+      getFillColor: SCRIM_FILL,
+      stroked: false,
+      pickable: false,
+      parameters: { depthTest: false },
     }),
 
     // Flow arcs (toggleable).
@@ -185,7 +229,7 @@ export default function MapView({
         stroked: true,
         pickable: true,
         autoHighlight: true,
-        highlightColor: [255, 255, 255, 120],
+        highlightColor: [255, 255, 255, 20],
         onClick: (info: any) =>
           info.object &&
           onPickCity(

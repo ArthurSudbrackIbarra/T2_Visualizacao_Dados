@@ -133,18 +133,48 @@ export default function Controls({ meta, filters, setFilters, view }: Props) {
       </select>
 
       <label>
-        Ano:{" "}
+        Período (anos):{" "}
         <span style={{ fontWeight: "bold", marginLeft: 2 }}>
-          {filters.year}
+          {filters.yearStart === filters.yearEnd
+            ? filters.yearStart
+            : `${filters.yearStart}–${filters.yearEnd}`}
         </span>
+        <Help wide>
+          Selecione um intervalo de anos. Deixe os dois controles no mesmo ano
+          para ver um único ano; as internações são somadas ao longo do
+          intervalo escolhido.
+        </Help>
       </label>
-      <input
-        type="range"
-        min={yMin}
-        max={yMax}
-        value={filters.year}
-        onChange={(e) => set({ year: Number(e.target.value) })}
-      />
+      <div className="year-range">
+        <div className="yr-row">
+          <span>De</span>
+          <input
+            type="range"
+            min={yMin}
+            max={yMax}
+            value={filters.yearStart}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              set({ yearStart: v, yearEnd: Math.max(v, filters.yearEnd) });
+            }}
+          />
+          <b>{filters.yearStart}</b>
+        </div>
+        <div className="yr-row">
+          <span>Até</span>
+          <input
+            type="range"
+            min={yMin}
+            max={yMax}
+            value={filters.yearEnd}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              set({ yearEnd: v, yearStart: Math.min(v, filters.yearStart) });
+            }}
+          />
+          <b>{filters.yearEnd}</b>
+        </div>
+      </div>
 
       <label>
         Mês:{" "}

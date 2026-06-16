@@ -49,7 +49,9 @@ def main() -> None:
     con.execute(f"PRAGMA memory_limit='{MEMORY_LIMIT}'")
     con.execute(f"PRAGMA temp_directory='{OUTPUT_DIR / 'tmp'}'")
     con.execute(f"ATTACH '{SOURCE_DB}' AS src (READ_ONLY)")
-    log(f"connected. window {START_YEAR}-{END_YEAR}, threads={THREADS}, mem={MEMORY_LIMIT}")
+    log(
+        f"connected. window {START_YEAR}-{END_YEAR}, threads={THREADS}, mem={MEMORY_LIMIT}"
+    )
 
     # -- dimensions (small, copied straight over) ---------------------------
     log("building dimensions ...")
@@ -183,6 +185,59 @@ def main() -> None:
     n_mun = con.execute("SELECT COUNT(*) FROM fato_municipio_ano").fetchone()[0]
     log(f"  fato_municipio_ano: {n_mun:,} rows")
 
+    # -- fato_municipio_mes : same metrics at (munic, ano, MÊS, espec) grain --
+    # Powers month-filtered choropleth/ranking. Derived from fato_fluxo; population
+    # is reattached per (munic, ano) from the annual table. Summed over months it
+    # equals fato_municipio_ano exactly. SQL mirrored in etl/add_municipio_mes.py.
+    log("building fato_municipio_mes (from fato_fluxo) ...")
+    con.execute(
+        """
+        CREATE TABLE fato_municipio_mes AS
+        WITH origem AS (
+            SELECT munic_orig AS munic_id, ano, mes, espec_id,
+                   SUM(qtd_internacoes)                                                   AS internacoes_residentes,
+                   SUM(CASE WHEN munic_orig <> munic_dest THEN qtd_internacoes ELSE 0 END) AS internacoes_exportadas,
+                   SUM(qtd_obitos)                                                        AS obitos_residentes
+            FROM fato_fluxo GROUP BY ALL
+        ),
+        destino AS (
+            SELECT munic_dest AS munic_id, ano, mes, espec_id,
+                   SUM(qtd_internacoes)                                                   AS internacoes_recebidas,
+                   SUM(CASE WHEN munic_orig <> munic_dest THEN qtd_internacoes ELSE 0 END) AS internacoes_recebidas_externas,
+                   SUM(soma_val_tot)                                                      AS val_tot_recebido
+            FROM fato_fluxo GROUP BY ALL
+        ),
+        socio AS (
+            SELECT munic_id, ano, MAX(populacao) AS populacao, MAX(leitos_sus) AS leitos_sus
+            FROM fato_municipio_ano GROUP BY munic_id, ano
+        )
+        SELECT
+            COALESCE(o.munic_id, d.munic_id)                          AS munic_id,
+            COALESCE(o.ano, d.ano)                                    AS ano,
+            COALESCE(o.mes, d.mes)                                    AS mes,
+            COALESCE(o.espec_id, d.espec_id)                          AS espec_id,
+            COALESCE(o.internacoes_residentes, 0)                     AS internacoes_residentes,
+            COALESCE(o.internacoes_exportadas, 0)                     AS internacoes_exportadas,
+            COALESCE(o.obitos_residentes, 0)                          AS obitos_residentes,
+            COALESCE(d.internacoes_recebidas, 0)                      AS internacoes_recebidas,
+            COALESCE(d.internacoes_recebidas_externas, 0)             AS internacoes_recebidas_externas,
+            COALESCE(d.val_tot_recebido, 0)                           AS val_tot_recebido,
+            COALESCE(d.internacoes_recebidas, 0) - COALESCE(o.internacoes_residentes, 0) AS saldo,
+            CASE WHEN COALESCE(o.internacoes_residentes, 0) > 0
+                 THEN COALESCE(o.internacoes_exportadas, 0)::DOUBLE / o.internacoes_residentes
+                 ELSE NULL END                                        AS taxa_exportacao,
+            s.populacao,
+            s.leitos_sus
+        FROM origem o
+        FULL OUTER JOIN destino d
+          ON o.munic_id = d.munic_id AND o.ano = d.ano AND o.mes = d.mes AND o.espec_id = d.espec_id
+        LEFT JOIN socio s
+          ON COALESCE(o.munic_id, d.munic_id) = s.munic_id AND COALESCE(o.ano, d.ano) = s.ano
+        """
+    )
+    n_mun_mes = con.execute("SELECT COUNT(*) FROM fato_municipio_mes").fetchone()[0]
+    log(f"  fato_municipio_mes: {n_mun_mes:,} rows")
+
     # -- dim_tempo : which (ano, mes) actually exist in the aggregates ------
     con.execute(
         """
@@ -208,14 +263,18 @@ def main() -> None:
     total_agg, total_raw, n_mun_hosp, pct_fora = checks
     dropped = total_raw - total_agg
     log(f"  aggregated admissions: {total_agg:,}")
-    log(f"  raw in window:         {total_raw:,}  (dropped {dropped:,} = "
-        f"{100 * dropped / total_raw:.2f}% — no CNES/MUNIC match)")
+    log(
+        f"  raw in window:         {total_raw:,}  (dropped {dropped:,} = "
+        f"{100 * dropped / total_raw:.2f}% — no CNES/MUNIC match)"
+    )
     log(f"  municipalities with a hospital: {n_mun_hosp:,}")
     log(f"  cross-municipality admissions: {pct_fora}%")
 
     con.close()
-    log(f"DONE. output: {OUTPUT_DB}  ({OUTPUT_DB.stat().st_size / 1e6:.1f} MB)  "
-        f"total {time.time() - t0:.0f}s")
+    log(
+        f"DONE. output: {OUTPUT_DB}  ({OUTPUT_DB.stat().st_size / 1e6:.1f} MB)  "
+        f"total {time.time() - t0:.0f}s"
+    )
 
 
 if __name__ == "__main__":

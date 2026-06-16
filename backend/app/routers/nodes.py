@@ -31,9 +31,25 @@ def _value(row: dict, metric: str):
 
 
 @lru_cache(maxsize=256)
-def _nodes(level: str, year: int, espec: int | None, metric: str) -> list[dict]:
-    espec_clause = "AND espec_id = ?" if espec is not None else ""
-    espec_params: list = [espec] if espec is not None else []
+def _nodes(
+    level: str,
+    year_min: int,
+    year_max: int,
+    month: int | None,
+    espec: int | None,
+    metric: str,
+) -> list[dict]:
+    # Built on fato_municipio_mes so the choropleth honors a year range and an
+    # optional month; summed over all months it equals the annual table.
+    filt = ["ano BETWEEN ? AND ?"]
+    fparams: list = [year_min, year_max]
+    if month is not None:
+        filt.append("mes = ?")
+        fparams.append(month)
+    if espec is not None:
+        filt.append("espec_id = ?")
+        fparams.append(espec)
+    where = " AND ".join(filt)
 
     if level == "uf":
         sql = f"""
@@ -46,8 +62,8 @@ def _nodes(level: str, year: int, espec: int | None, metric: str) -> list[dict]:
                        SUM(saldo)                   AS saldo,
                        MAX(populacao)               AS populacao,
                        MAX(leitos_sus)              AS leitos_sus
-                FROM fato_municipio_ano
-                WHERE ano = ? {espec_clause}
+                FROM fato_municipio_mes
+                WHERE {where}
                 GROUP BY munic_id
             )
             SELECT u.uf_cod AS id, u.sigla AS name, u.lat, u.lon, u.sigla AS uf,
@@ -61,7 +77,7 @@ def _nodes(level: str, year: int, espec: int | None, metric: str) -> list[dict]:
             JOIN dim_uf u ON p.uf_cod = u.uf_cod
             GROUP BY u.uf_cod, u.sigla, u.lat, u.lon
         """
-        params = [year, *espec_params]
+        params = fparams
     else:  # munic
         sql = f"""
             SELECT m.munic_id AS id, m.nome AS name, m.lat, m.lon, m.uf,
@@ -72,12 +88,12 @@ def _nodes(level: str, year: int, espec: int | None, metric: str) -> list[dict]:
                    SUM(f.saldo)                  AS saldo,
                    MAX(f.populacao)              AS populacao,
                    MAX(f.leitos_sus)             AS leitos_sus
-            FROM fato_municipio_ano f
+            FROM fato_municipio_mes f
             JOIN dim_municipio m ON f.munic_id = m.munic_id
-            WHERE f.ano = ? {espec_clause}
+            WHERE {where}
             GROUP BY m.munic_id, m.nome, m.lat, m.lon, m.uf, m.regiao_saude
         """
-        params = [year, *espec_params]
+        params = fparams
 
     rows = db.query(sql, params)
     for r in rows:
@@ -90,10 +106,13 @@ def _nodes(level: str, year: int, espec: int | None, metric: str) -> list[dict]:
 @router.get("/nodes", summary="Métricas por nó (coroplético / scatter)")
 def nodes(
     level: str = Query("uf", pattern="^(uf|munic)$"),
-    year: int = Query(..., ge=2008, le=2023),
+    year_min: int = Query(..., ge=2008, le=2023),
+    year_max: int = Query(..., ge=2008, le=2023),
+    month: int | None = Query(None, ge=1, le=12),
     espec: int | None = None,
     metric: str = Query("saldo"),
 ) -> list[dict]:
     if metric not in _METRICS:
         metric = "saldo"
-    return _nodes(level, year, espec, metric)
+    lo, hi = (year_min, year_max) if year_min <= year_max else (year_max, year_min)
+    return _nodes(level, lo, hi, month, espec, metric)

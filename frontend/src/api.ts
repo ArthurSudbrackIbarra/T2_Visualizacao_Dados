@@ -22,7 +22,8 @@ export const api = {
 
   flows: (p: {
     view: string;
-    year: number;
+    year_min: number;
+    year_max: number;
     month?: number | null;
     espec?: number | null;
     state?: number | null;
@@ -33,13 +34,17 @@ export const api = {
 
   nodes: (p: {
     level: string;
-    year: number;
+    year_min: number;
+    year_max: number;
+    month?: number | null;
     espec?: number | null;
     metric: string;
   }) => get<NodeMetric[]>("/nodes", p),
 
   ranking: (p: {
-    year: number;
+    year_min: number;
+    year_max: number;
+    month?: number | null;
     espec?: number | null;
     uf?: number | null;
     metric?: string;
@@ -51,6 +56,7 @@ export const api = {
     level: string;
     id: number;
     espec?: number | null;
-    year?: number | null;
+    year_min: number;
+    year_max: number;
   }) => get<TimePoint[]>("/timeseries", p),
 };

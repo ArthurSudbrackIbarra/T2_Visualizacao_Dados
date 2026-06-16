@@ -76,6 +76,31 @@
   margin: 7px 0 0;
 }
 
+.year-range {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.yr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.yr-row span {
+  width: 28px;
+  font-size: 11px;
+  color: #9aa0ad;
+}
+.yr-row input[type="range"] {
+  flex: 1;
+}
+.yr-row b {
+  width: 34px;
+  text-align: right;
+  font-size: 12px;
+  color: #e8e8ea;
+}
+
 /* subtle checkbox rows (override the uppercase section-label style) */
 .check-row {
   display: flex;

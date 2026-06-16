@@ -7,6 +7,7 @@ import Breadcrumb from "./components/Breadcrumb";
 import { api } from "./api";
 import { INITIAL_VIEW_STATE } from "./config";
 import { buildColorScale } from "./colors";
+import { decodeState, encodeState } from "./urlState";
 import type {
   Filters,
   Flow,
@@ -43,23 +44,46 @@ export default function App() {
     setFlyToken((t) => t + 1);
   };
 
-  // load meta once
+  // load meta once, then restore any view state encoded in the URL (shared link)
   useEffect(() => {
     api
       .meta()
       .then((m) => {
         setMeta(m);
-        setFilters({
-          year: m.anos_range[1],
+        const defaults: Filters = {
+          yearStart: m.anos_range[1],
+          yearEnd: m.anos_range[1],
           month: null,
           espec: null,
           metric: "saldo",
           direction: "both",
           showLines: true,
-        });
+        };
+        const restored = decodeState(
+          new URLSearchParams(window.location.search),
+          m,
+        );
+        setFilters({ ...defaults, ...restored.filters });
+        if (restored.nav) setNav(restored.nav);
+        if (restored.fly)
+          flyTo(
+            restored.fly.longitude,
+            restored.fly.latitude,
+            restored.fly.zoom,
+          );
       })
       .catch((e) => setError(String(e)));
   }, []);
+
+  // Keep the URL in sync with the current filters + selection so it can be shared.
+  useEffect(() => {
+    if (!meta || !filters) return;
+    const qs = encodeState(filters, nav, meta);
+    const url = qs
+      ? `${window.location.pathname}?${qs}`
+      : window.location.pathname;
+    window.history.replaceState(null, "", url);
+  }, [filters, nav, meta]);
 
   const focus: Focus | null = useMemo(() => {
     if (nav.view === "city" && nav.city)
@@ -75,13 +99,21 @@ export default function App() {
     api
       .nodes({
         level: "uf",
-        year: filters.year,
+        year_min: filters.yearStart,
+        year_max: filters.yearEnd,
+        month: filters.month,
         espec: filters.espec,
         metric: filters.metric,
       })
       .then(setUfNodes)
       .catch((e) => setError(String(e)));
-  }, [filters?.year, filters?.espec, filters?.metric]);
+  }, [
+    filters?.yearStart,
+    filters?.yearEnd,
+    filters?.month,
+    filters?.espec,
+    filters?.metric,
+  ]);
 
   // hierarchical flow arcs
   useEffect(() => {
@@ -91,7 +123,8 @@ export default function App() {
         view: nav.view,
         state: nav.state?.cod ?? null,
         city: nav.city?.id ?? null,
-        year: filters.year,
+        year_min: filters.yearStart,
+        year_max: filters.yearEnd,
         month: filters.month,
         espec: filters.espec,
         direction: filters.direction,
@@ -103,7 +136,8 @@ export default function App() {
     nav.view,
     nav.state?.cod,
     nav.city?.id,
-    filters?.year,
+    filters?.yearStart,
+    filters?.yearEnd,
     filters?.month,
     filters?.espec,
     filters?.direction,
@@ -168,7 +202,7 @@ export default function App() {
     if (u) flyTo(u.lon, u.lat, 5.6);
   };
   const selectCity = (id: number, name: string, lat: number, lon: number) => {
-    setNav((n) => ({ ...n, view: "city", city: { id, name } }));
+    setNav((n) => ({ ...n, view: "city", city: { id, name, lat, lon } }));
     flyTo(lon, lat, 8);
   };
 

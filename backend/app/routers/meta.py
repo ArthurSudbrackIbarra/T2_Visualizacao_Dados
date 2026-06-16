@@ -35,7 +35,9 @@ def _meta() -> dict:
     complexidades = db.query(
         "SELECT complex_id AS id, nome FROM dim_complexidade ORDER BY complex_id"
     )
-    anos = [r["ano"] for r in db.query("SELECT DISTINCT ano FROM dim_tempo ORDER BY ano")]
+    anos = [
+        r["ano"] for r in db.query("SELECT DISTINCT ano FROM dim_tempo ORDER BY ano")
+    ]
     ufs = db.query(
         "SELECT uf_cod AS cod, sigla, lat, lon, qtd_municipios "
         "FROM dim_uf ORDER BY sigla"
