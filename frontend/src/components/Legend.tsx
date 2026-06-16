@@ -1,5 +1,5 @@
 import { METRICS } from "../config";
-import { SCRIM_K, type ColorScale } from "../colors";
+import { type ColorScale } from "../colors";
 import type { View } from "../types";
 
 interface Props {
@@ -12,13 +12,10 @@ interface Props {
 export default function Legend({ metric, scale, view, showLines }: Props) {
   const label = METRICS.find((m) => m.id === metric)?.label ?? metric;
   const [lo, hi] = scale.domain;
-  // Dim swatches by the same factor the map scrim applies to the states, so the
-  // legend color equals the color actually rendered on the map.
-  const dim = (x: number) => Math.round(x * SCRIM_K);
   const stops = Array.from({ length: 7 }, (_, i) => {
     const t = i / 6;
     const c = scale.color(lo + (hi - lo) * t);
-    return `rgb(${dim(c[0])},${dim(c[1])},${dim(c[2])})`;
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
   });
   const fmt = (v: number) =>
     metric === "taxa_exportacao"

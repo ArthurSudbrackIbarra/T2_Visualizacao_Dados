@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DeckGL from "@deck.gl/react";
 import { FlyToInterpolator } from "@deck.gl/core";
-import {
-  ArcLayer,
-  GeoJsonLayer,
-  ScatterplotLayer,
-  SolidPolygonLayer,
-} from "@deck.gl/layers";
+import { ArcLayer, GeoJsonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { Map } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -17,19 +12,11 @@ import {
   ARC_SOURCE,
   ARC_TARGET,
   HILITE,
-  SCRIM_FILL,
+  STATE_BORDER,
   withAlpha,
   type ColorScale,
 } from "../colors";
 import type { Flow, Focus, Nav } from "../types";
-
-// A world-spanning quad used as the constant dark scrim under the arcs.
-const SCRIM_POLY = [
-  [-180, -80],
-  [180, -80],
-  [180, 84],
-  [-180, 84],
-];
 
 export interface CityNode {
   id: number;
@@ -71,8 +58,9 @@ export default function MapView({
   const view = nav.view;
   const selectedSigla = nav.state?.sigla ?? null;
   const focusCityId = nav.city?.id ?? null;
-  // state currently under the cursor — drives the bright yellow hover outline
+  // entities under the cursor — drive the white hover outlines
   const [hoverSigla, setHoverSigla] = useState<string | null>(null);
+  const [hoverCityId, setHoverCityId] = useState<number | null>(null);
 
   // controlled camera so we can fly to an entity selected from the panel or the map
   const [viewState, setViewState] = useState<any>(INITIAL_VIEW_STATE);
@@ -124,23 +112,18 @@ export default function MapView({
       getFillColor: (f: any) => {
         const v = geojsonValueBySigla.get(f.properties.sigla) ?? null;
         const c = colorScale.color(v);
-        // Opaque in every view so the rendered color matches the legend exactly;
-        // the constant scrim below the arcs (not a per-view alpha) supplies the
-        // darkening. States with no data stay faint.
-        return [c[0], c[1], c[2], v == null ? 60 : 255];
+        return [c[0], c[1], c[2], v == null ? 70 : 255];
       },
       getLineColor: (f: any) => {
         const sig = f.properties.sigla;
-        // Hover uses the same amber as the selected-state border (HILITE) for
-        // consistency; the thicker width distinguishes hover from selection.
-        if (view !== "city" && sig === hoverSigla) return HILITE;
-        if (sig === selectedSigla) return HILITE;
-        return [200, 210, 225, 90];
+        if (sig === selectedSigla) return STATE_BORDER;
+        if (view !== "city" && sig === hoverSigla) return STATE_BORDER;
+        return [120, 130, 145, 120];
       },
       getLineWidth: (f: any) => {
         const sig = f.properties.sigla;
-        if (view !== "city" && sig === hoverSigla) return 4;
-        if (sig === selectedSigla) return 3;
+        if (sig === selectedSigla) return 2.5;
+        if (view !== "city" && sig === hoverSigla) return 1.5;
         return 1;
       },
       lineWidthUnits: "pixels",
@@ -161,19 +144,6 @@ export default function MapView({
         getLineColor: [selectedSigla, hoverSigla, view],
         getLineWidth: [selectedSigla, hoverSigla, view],
       },
-    }),
-
-    // Constant dark scrim over the basemap + states (under the arcs) — keeps the
-    // scene dark in every view so flows are always easy to read. Not pickable, so
-    // state clicks pass straight through to the polygons below.
-    new SolidPolygonLayer({
-      id: "scrim",
-      data: [SCRIM_POLY],
-      getPolygon: (d: any) => d,
-      getFillColor: SCRIM_FILL,
-      stroked: false,
-      pickable: false,
-      parameters: { depthTest: false },
     }),
 
     // Flow arcs (toggleable).
@@ -216,20 +186,34 @@ export default function MapView({
         id: "cities",
         data: cityNodes,
         getPosition: (d) => [d.lon, d.lat],
-        getRadius: (d) =>
-          2000 + (Math.sqrt(d.total) / Math.sqrt(maxNode)) * 26000,
+        getRadius: (d) => {
+          const base = 2000 + (Math.sqrt(d.total) / Math.sqrt(maxNode)) * 26000;
+          // grow on hover so it's obvious the node is interactive
+          return d.id === hoverCityId ? base * 1.6 : base;
+        },
         radiusUnits: "meters",
         radiusMinPixels: 3,
         getFillColor: (d) =>
-          d.id === focusCityId ? [255, 235, 160, 230] : [235, 240, 250, 190],
+          d.id === focusCityId
+            ? [255, 235, 160, 230]
+            : d.id === hoverCityId
+              ? [255, 255, 255, 255]
+              : [235, 240, 250, 190],
         getLineColor: (d) =>
-          d.id === focusCityId ? HILITE : [10, 12, 16, 220],
-        getLineWidth: (d) => (d.id === focusCityId ? 3 : 1),
+          d.id === focusCityId
+            ? HILITE
+            : d.id === hoverCityId
+              ? STATE_BORDER
+              : [10, 12, 16, 220],
+        getLineWidth: (d) =>
+          d.id === focusCityId ? 3 : d.id === hoverCityId ? 3 : 1,
         lineWidthUnits: "pixels",
         stroked: true,
         pickable: true,
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 20],
+        // manual hover (ring + grow) is far more visible than the default tint
+        autoHighlight: false,
+        onHover: (info: any) =>
+          setHoverCityId(info.object ? info.object.id : null),
         onClick: (info: any) =>
           info.object &&
           onPickCity(
@@ -239,9 +223,10 @@ export default function MapView({
             info.object.lon,
           ),
         updateTriggers: {
-          getFillColor: [focusCityId],
-          getLineColor: [focusCityId],
-          getLineWidth: [focusCityId],
+          getRadius: [maxNode, hoverCityId],
+          getFillColor: [focusCityId, hoverCityId],
+          getLineColor: [focusCityId, hoverCityId],
+          getLineWidth: [focusCityId, hoverCityId],
         },
       }),
   ].filter(Boolean);
