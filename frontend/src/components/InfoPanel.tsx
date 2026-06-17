@@ -188,7 +188,11 @@ export default function InfoPanel({
                 margin={{ top: 5, right: 8, bottom: 0, left: -10 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis dataKey="mes" tick={{ fontSize: 10, fill: "#aaa" }} />
+                <XAxis
+                  dataKey="mes"
+                  interval={0}
+                  tick={{ fontSize: 10, fill: "#aaa" }}
+                />
                 <YAxis tick={{ fontSize: 10, fill: "#aaa" }} width={48} />
                 <Tooltip
                   contentStyle={{
