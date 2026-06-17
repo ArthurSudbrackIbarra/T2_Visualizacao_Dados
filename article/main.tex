@@ -1,0 +1,83 @@
+\documentclass[journal]{vgtc}                      % final (journal style)
+%\documentclass[review,journal]{vgtc}              % review (journal style)
+%\documentclass[widereview]{vgtc}                  % wide-spaced review
+%\documentclass[preprint,journal]{vgtc}            % preprint (journal style)
+
+\onlineid{0}
+
+%% Declare the category of your paper, only shown in review mode
+\vgtccategory{Research}
+
+%% Paper title.
+\title{Visualizing Patient Flows in Brazil's Unified Health System: An Interactive Map of {SIH/SUS} Hospitalizations}
+
+%% Author names and affiliations. Replace the placeholder names and e-mails.
+\author{
+  Arthur Sudbrack Ibarra,
+  Delmar Lucas Dorneles Quaresma,
+  Eduardo Villarinho Curia,
+  Kelvin Queiros Pessoa, and
+  Lucas Angelo Loges,
+}
+
+\authorfooter{
+  \item
+  	All authors are with the Pontifical Catholic University of Rio Grande do Sul (PUCRS), Porto Alegre, Brazil.
+  	E-mail: \{author.one\,$|$\,author.two\,$|$\,author.three\,$|$\,author.four\}@edu.pucrs.br.
+}
+
+%% Abstract section.
+\abstract{
+  Brazil's Unified Health System (SUS) records every publicly funded hospital admission in the SIH/SUS dataset, including the patient's municipality of residence and the municipality where the admission took place.
+  Together these fields describe how patients move across the country to be hospitalized, but the size of the data hides this pattern in ordinary tables and static maps.
+  We present an interactive flow map that draws these movements as origin-destination arcs over a map of Brazil.
+  The view is organized in three levels, country, state, and city, and supports filtering by medical specialty, year, and month, along with side panels that rank attracting and dependent municipalities and compare resident and incoming admissions across the year.
+  Using more than 180 million admissions from 2008 to 2023, we show how the tool helps answer questions about patient export, care gaps, regional hubs, and seasonal demand.%
+}
+
+%% Keywords that describe your work. Will show as 'Index Terms' in journal
+\keywords{Geographic visualization, flow maps, origin-destination data, public health, interactive visualization.}
+
+%% Uncomment and add a teaser image once one is available.
+%\teaser{
+%  \centering
+%  \includegraphics[width=\linewidth]{teaser}
+%  \caption{The interactive flow map at the national level.}
+%  \label{fig:teaser}
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% LOAD PACKAGES %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\graphicspath{{figs/}{figures/}{pictures/}{images/}{./}}
+
+\usepackage{booktabs}                  % for tables
+\usepackage{mathptmx}                  % use matching math font
+\usepackage{graphicx}                  % for figures
+\usepackage{tikz}                      % for the architecture diagram
+\usetikzlibrary{arrows.meta,positioning}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% START OF THE PAPER %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\firstsection{Introduction}
+
+\maketitle
+
+\input{sections/introduction}
+\input{sections/related_work}
+
+\input{sections/proposed_visualization}
+
+%% Sections to be written next:
+%\input{sections/results}
+%\input{sections/conclusions}
+
+\bibliographystyle{abbrv-doi-hyperref}
+\bibliography{references}
+
+\end{document}

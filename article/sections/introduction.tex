@@ -1,0 +1,20 @@
+Brazil's Unified Health System (SUS) gives every resident the right to public hospital care.
+In practice, hospitals and medical specialties are spread unevenly across the country, so many patients leave their home town to be admitted elsewhere.
+Knowing where these patients go, and for which specialties, helps managers plan hospital beds and find regions that depend on care produced somewhere else.
+
+The Hospital Information System of SUS (SIH/SUS), published by DATASUS, records every publicly funded hospital admission.
+Each record stores the patient's municipality of residence and the municipality of the hospital, so a single admission already describes a movement between two places.
+The data is large: our extract holds more than 180 million admissions from 2008 to 2023.
+At this size, tables and static maps make it hard to see the overall pattern of movement between cities and states.
+
+We present an interactive flow map of these hospitalization flows.
+Each arc links the patient's residence to the hospital municipality, and its width grows with the number of admissions.
+The map works at three levels, from the whole country down to one state and then one city, so the user opens detail only where it is needed.
+Filters by medical specialty, year range, and month narrow the data, and a side panel ranks the cities that most attract patients and the ones whose residents most depend on care elsewhere.
+
+The design answers four questions raised in the first part of this work:
+(1) what share of patients is treated outside their home municipality, and how it varies by specialty;
+(2) where the care gaps are for specific specialties such as oncology;
+(3) which cities sustain the hospital care of a whole region;
+and (4) whether seasonal peaks in admissions are driven by patients coming from outside.
+This paper describes how we prepared the data and designed the visualization, and shows how it answers these questions for admissions between 2008 and 2023.
