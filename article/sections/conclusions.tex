@@ -1,0 +1,24 @@
+\section{Conclusion and Future Work}
+
+We presented an interactive flow map of hospital admissions in the Brazilian public system.
+The tool draws each admission as an arc from the patient's residence to the hospital municipality, works at the national, state, and municipal levels, and lets the user filter by specialty, year, and month.
+Through worked examples we showed that it can bring out gaps in care for a specialty, the hub cities that concentrate the care of a region, and the seasonal balance between resident and incoming patients.
+The contribution is the visualization itself, which exposes movement that the official tabular access leaves hidden.
+
+The examples are illustrations rather than a complete study, and the work has clear limits.
+The most important one concerns the specialty field.
+SIH/SUS records the specialty of the hospital bed, and this field is sparsely filled.
+A few categories, mainly oral and maxillofacial surgery, general surgery, cardiology, and a combined surgical and diagnostic category, account for almost all admissions, while specialties such as oncology and endocrinology appear in very few records, and several others had too little data to keep.
+Much of this care is likely registered through the procedure and diagnosis fields rather than the bed specialty, so a filter built on this single field gives only a partial view.
+
+Other limits follow from the same design choices.
+The latest year is incomplete in its final months, so we relied on complete years.
+State-level arcs start from state centroids, and a small number of municipalities without coordinates are left out.
+The per-capita metric depends on population data and is available only for the years that report it.
+Finally, the tool shows where demand concentrates but does not measure hospital capacity, so it points to possible overload rather than confirming it.
+
+Future work follows directly from these limits.
+Reading the procedure and diagnosis fields would recover the specialties that the bed-specialty field misses, oncology in particular, and would widen the analysis of care gaps.
+Joining the flows to the number of SUS beds would turn the signal of concentration into a measure of load.
+Finer geography, such as health regions and population-weighted centroids, would sharpen the map, and the cost and length-of-stay fields would add a financial and outcome dimension to the movement of patients.
+We also intend to validate the patterns with health managers, for whom the local reading of each city is the most useful result.

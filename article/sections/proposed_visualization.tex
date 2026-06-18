@@ -43,11 +43,26 @@ We draw each hospitalization flow as a curved arc from the patient's residence t
 The width of the arc grows with the number of admissions, so the thickest arcs mark the busiest routes.
 Color marks the direction relative to the place in focus, with arcs that leave a region drawn in orange and arcs that arrive drawn in blue.
 
-A choropleth sits behind the arcs and fills each state or city with one chosen metric.
-The default metric is the attraction balance, the number of admissions a place receives minus the number its own residents generate.
-Blue means the place treats more patients than it sends away, and red means the opposite.
-City nodes appear as circles sized by the number of admissions that pass through them.
-A dark basemap keeps the arcs and nodes easy to read.
+A choropleth sits behind the arcs and fills each state or municipality according to a metric chosen by the user.
+The tool offers five metrics, shown for the whole country in Figure~\ref{fig:metrics}.
+The default is the attraction balance, the admissions a place receives minus the admissions its own residents generate; it uses a diverging blue-to-red scale, where blue marks a net attractor and red marks a place that sends away more patients than it receives.
+The export rate, the share of residents treated in another municipality, uses a yellow-to-red scale.
+Two metrics report absolute volume, the admissions received on a blue scale and the admissions exported on an orange scale.
+The fifth metric divides the admissions received by the local population to give a per-capita rate on a purple scale, available for the years that have population data.
+City nodes appear as circles sized by the number of admissions that pass through them, and a dark basemap keeps the arcs and nodes legible.
+
+\begin{figure*}[t]
+  \centering
+  % TODO: drop the five-metric image into figs/ as 'choropleth-metrics.jpeg' and
+  % replace the placeholder box below with the \includegraphics line.
+  %\includegraphics[width=\linewidth]{choropleth-metrics.jpeg}
+  \fbox{\parbox[c][30mm][c]{0.98\linewidth}{\centering Placeholder: choropleth of Brazil under the five metrics (add \texttt{choropleth-metrics.jpeg}).}}
+  \caption{%
+    The five choropleth metrics shown for Brazil at the national level: the attraction balance, the export rate, the admissions received, the admissions exported, and the admissions received per 1{,}000 inhabitants.
+    Each metric uses its own color scale, so the same map answers a different question.%
+  }
+  \label{fig:metrics}
+\end{figure*}
 
 \subsection{Three levels of detail}
 
@@ -79,37 +94,11 @@ A further option plays the twelve months in sequence, so seasonal change appears
 
 \subsection{Analytical panels}
 
-Two side panels turn the map into direct answers.
-The ranking panel lists the places with the strongest attraction balance, and a toggle switches between the cities that attract the most patients and the cities that most depend on others.
-Figure~\ref{fig:ranking} shows this ranking for Rio Grande do Sul, with Porto Alegre as the clear hub and Viam\~{a}o among the most dependent municipalities.
+Two side panels sit next to the map, both visible in Figure~\ref{fig:drilldown}.
+The first ranks municipalities by the same attraction balance used for the choropleth.
+A toggle reverses the order between the places that attract the most patients and the places that most depend on others.
 
 The second panel plots a monthly time series that separates resident admissions from incoming ones.
 This shows whether a seasonal peak comes from local patients or from people arriving from elsewhere.
 
-The arc colors make the same contrast visible on the map.
-Figure~\ref{fig:contrast} compares the two municipalities from the ranking, filtered to facial surgery between 2015 and 2023.
-Porto Alegre is covered by blue arcs that arrive from across the state and from other states, while Viam\~{a}o shows mostly orange arcs that leave for nearby cities.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.92\columnwidth]{attract-vs-depend-more.jpeg}
-  \caption{%
-    The attraction ranking for Rio Grande do Sul, all specialties, 2019 to 2023.
-    Left: the municipalities that attract the most patients, led by Porto Alegre.
-    Right: the municipalities that most depend on care elsewhere, led by Viam\~{a}o.
-    Bar length encodes the attraction balance, blue for positive and red for negative.%
-  }
-  \label{fig:ranking}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.92\columnwidth]{poa-vs-viamao-buco-maxilo-facial.jpeg}
-  \caption{%
-    City level view of two municipalities in Rio Grande do Sul for facial surgery (Buco Maxilo Facial), 2015 to 2023.
-    Porto Alegre (top) is reached by many blue arcs, since patients arrive from across the state and from other states.
-    Viam\~{a}o (bottom) shows mostly orange arcs, since its residents leave for other cities.
-    The two were the top attracting and top dependent municipalities in the ranking of Figure~\ref{fig:ranking}.%
-  }
-  \label{fig:contrast}
-\end{figure}
+Selecting a row in either panel moves the map to that municipality, so a reading in a panel and the matching shape on the map stay linked.

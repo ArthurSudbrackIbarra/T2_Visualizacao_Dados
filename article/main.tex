@@ -8,31 +8,34 @@
 %% Declare the category of your paper, only shown in review mode
 \vgtccategory{Research}
 
+%% Remove the IEEE "Manuscript received ..." / reprints / DOI note from the first page.
+\manuscriptnote{}
+
 %% Paper title.
 \title{Visualizing Patient Flows in Brazil's Unified Health System: An Interactive Map of {SIH/SUS} Hospitalizations}
 
 %% Author names and affiliations. Replace the placeholder names and e-mails.
-\author{
+\author{%
   Arthur Sudbrack Ibarra,
   Delmar Lucas Dorneles Quaresma,
-  Eduardo Villarinho Curia,
-  Kelvin Queiros Pessoa, and
-  Lucas Angelo Loges,
+  Eduardo Villarinho Curia\\
+  Kelvin Queiros Pessoa,
+  and Lucas Angelo Loges%
 }
 
 \authorfooter{
   \item
   	All authors are with the Pontifical Catholic University of Rio Grande do Sul (PUCRS), Porto Alegre, Brazil.
-  	E-mail: \{author.one\,$|$\,author.two\,$|$\,author.three\,$|$\,author.four\}@edu.pucrs.br.
+  	E-mail: arthur.ibarra@edu.pucrs.br, delmar.q91@edu.pucrs.br, eduardo.curia@edu.pucrs.br, kelvin.pessoa@edu.pucrs.br, lucas.loges@edu.pucrs.br.
 }
 
 %% Abstract section.
 \abstract{
-  Brazil's Unified Health System (SUS) records every publicly funded hospital admission in the SIH/SUS dataset, including the patient's municipality of residence and the municipality where the admission took place.
-  Together these fields describe how patients move across the country to be hospitalized, but the size of the data hides this pattern in ordinary tables and static maps.
+  Brazil's Unified Health System (SUS) records every publicly funded hospital admission in the SIH/SUS dataset, a general-purpose source that also stores the patient's municipality of residence and the municipality where the admission took place.
+  Together these two fields describe how patients move across the country to be hospitalized, yet the official tabular access hides this movement and can conceal where a region depends on outside care.
   We present an interactive flow map that draws these movements as origin-destination arcs over a map of Brazil.
   The view is organized in three levels, country, state, and city, and supports filtering by medical specialty, year, and month, along with side panels that rank attracting and dependent municipalities and compare resident and incoming admissions across the year.
-  Using more than 180 million admissions from 2008 to 2023, we show how the tool helps answer questions about patient export, care gaps, regional hubs, and seasonal demand.%
+  Using more than 180 million admissions from 2008 to 2023, we present examples in which the tool reveals care gaps, regional hubs, and seasonal patterns that tabular access tends to hide.%
 }
 
 %% Keywords that describe your work. Will show as 'Index Terms' in journal
@@ -73,9 +76,7 @@
 
 \input{sections/proposed_visualization}
 \input{sections/results}
-
-%% Sections to be written next:
-%\input{sections/conclusions}
+\input{sections/conclusions}
 
 \bibliographystyle{abbrv-doi-hyperref}
 \bibliography{references}
