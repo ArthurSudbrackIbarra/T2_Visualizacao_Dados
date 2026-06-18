@@ -1,0 +1,70 @@
+\section{Analysis of Results}
+
+We used the tool to look at the four questions raised in the first part of the work.
+This section reports what the visualization shows for each one, using the public SIH/SUS data through the interface described above.
+The examples below use complete years, since the latest year in the extract is still missing part of its final months.
+
+\subsection{Patient export and regional hubs}
+
+Most hospital care is local, but a large share of patients still cross a municipal border.
+In our data about one admission in three happens outside the patient's home municipality, close to 34 percent between 2015 and 2019.
+The flow map turns this share into arcs and shows where the patients go.
+
+The ranking panel answers which cities sustain the care of a region.
+Figure~\ref{fig:ranking} shows Rio Grande do Sul, where Porto Alegre attracts far more patients than any other city, followed by Passo Fundo and Santa Maria.
+The other side of the toggle lists Viam\~{a}o, Alvorada, and Gravata\'{\i}, municipalities whose residents depend on care produced elsewhere.
+A small set of hubs therefore carries the demand of many surrounding towns.
+
+The map shows the same balance for a single specialty.
+Figure~\ref{fig:contrast} draws facial surgery for the two extreme cities of the ranking.
+Porto Alegre is covered by incoming blue arcs from across the state and from other states, while Viam\~{a}o shows mostly outgoing orange arcs.
+The same picture answers the first question, since the arcs and their width report the export of patients between places for a chosen specialty.
+
+\subsection{Gaps by specialty}
+
+A city can be a hub for one specialty and dependent for another.
+Figure~\ref{fig:gap} shows Santa Maria, a hub in the interior of Rio Grande do Sul, under two specialties in 2023.
+For cardiology the city received 3{,}391 admissions against 2{,}061 from its own residents, a positive balance of 1{,}330 and an export rate of 1 percent.
+For gastroenterology the same city received 281 against 405 residents, a negative balance of 124 and an export rate of 45 percent.
+
+Changing only the specialty filter flips Santa Maria from a blue hub reached by incoming arcs to a red municipality whose residents leave for other cities.
+This is the kind of care gap that the second question asks about, and the tool locates it for any specialty with enough records.
+The specialty field favors bed-based specialties, so a few areas such as oncology are under-reported and harder to read this way.
+
+\subsection{Seasonality}
+
+The monthly balance of resident and incoming patients is specific to each city.
+Figure~\ref{fig:seasonality} shows six municipalities across the twelve months of 2021.
+Vit\'{o}ria da Conquista is the most common case, where residents and incoming patients rise and fall together.
+Cear\'{a}-Mirim shows both groups climbing sharply from March, a clear seasonal peak that a hospital could prepare for.
+
+The other four cities show patterns that do not repeat elsewhere.
+In Muri\'{a}e the incoming patients peak several times while residents stay flat.
+In Gurupi the resident and incoming peaks alternate through the year.
+In Luzi\^{a}nia and Teut\^{o}nia a rise in residents lines up with a drop in incoming patients, which suggests that residents are served first when local demand grows; Teut\^{o}nia also peaks in winter.
+
+Because the shape changes so much between cities, a single national rule does not hold.
+In most cities residents and incoming patients move together, so seasonal peaks are usually not caused by a sudden rise in outside patients.
+The value of the monthly view is local: a manager can read the curve for one city and plan for its own peak, which is the practical answer to the fourth question.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\columnwidth]{santa-maria-cardio-vs-gastro.jpeg}
+  \caption{%
+    Santa Maria (Rio Grande do Sul) under two specialties in 2023.
+    Top: cardiology, where the city is a hub reached by incoming blue arcs (balance $+1{,}330$, export rate 1 percent).
+    Bottom: gastroenterology, where its residents leave along orange arcs (balance $-124$, export rate 45 percent).
+    Only the specialty filter changed between the two views.%
+  }
+  \label{fig:gap}
+\end{figure}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{seasonal-charts.jpeg}
+  \caption{%
+    Monthly resident and incoming admissions for six municipalities in 2021.
+    The shape of the curve changes from city to city, from residents and incoming patients moving together (Vit\'{o}ria da Conquista) to shared peaks (Cear\'{a}-Mirim), repeated incoming peaks (Muri\'{a}e), alternating peaks (Gurupi), and resident peaks that coincide with drops in incoming patients (Luzi\^{a}nia and Teut\^{o}nia).%
+  }
+  \label{fig:seasonality}
+\end{figure*}
