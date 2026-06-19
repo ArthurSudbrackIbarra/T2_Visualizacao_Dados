@@ -1,54 +1,24 @@
-\section{Analysis of Results}
+\section{Usage Scenarios}
 
 We now apply the tool to the three themes set out in the Introduction.
-The aim is not a complete study of any theme, but a demonstration that the visualization can surface the relevant patterns, which tabular access tends to obscure.
-Each example uses complete years, since the latest year in the extract still lacks part of its final months.
-As a general figure, close to 34 percent of admissions between 2015 and 2019 took place outside the patient's home municipality, so cross-border flow is substantial and worth visualizing.
+These are usage scenarios rather than a systematic study: each case below was chosen by hand to demonstrate a capability, not sampled by a defined criterion, so the figures describe the chosen places and do not generalize on their own.
+The scenarios use different year windows.
+For the spatial snapshots we use a recent complete year or a multi-year window that accumulates enough volume, with 2023 as the most recent year; for the seasonal analysis we use windows that end before 2023, because the final months of the latest year are still incomplete and would distort a monthly curve.
+Across the full 2008 to 2023 extract, 32 percent of the 183.3 million admissions (58.6 million) were recorded outside the patient's home municipality, counting an admission as exported when its residence and hospital municipalities differ; both counts come from the same aggregated dataset described in Section 3.
 
 \subsection{Gaps in care for a specialty}
 
 The first theme is the gap in care, where the residents of a region must travel for a given specialty.
 A municipality can be a hub for one specialty and dependent for another.
-Figure~\ref{fig:gap} shows Santa Maria, a hub in the interior of Rio Grande do Sul, under two specialties in 2023.
-For cardiology it received 3{,}391 admissions against 2{,}061 from its own residents, a positive balance of 1{,}330 and an export rate of 1 percent.
-For gastroenterology it received 281 against 405 residents, a negative balance of 124 and an export rate of 45 percent.
+Figure~\ref{fig:gap} shows Santa Maria, a hub in the interior of Rio Grande do Sul, under two specialties in 2023, the most recent complete year.
+For cardiology it received 3{,}391 admissions against 2{,}061 from its own residents, a positive balance of 1{,}330 and an export rate of 1 percent (12 of the 2{,}061 resident admissions were treated elsewhere).
+For gastroenterology it received 281 against 405 residents, a negative balance of 124 and an export rate of 45 percent (183 of 405).
 
 Changing only the specialty filter turns Santa Maria from a blue hub reached by incoming arcs into a red municipality whose residents leave for other cities.
 A pattern of this kind points a health authority to a specialty and a region that may need attention.
 Because the coverage of the specialty field is uneven, the reading is most reliable where a specialty has many admissions.
 
-\subsection{Hub cities and regional load}
-
-The second theme is the hub city that concentrates the care of a region, where the demand it absorbs may signal overload or a bottleneck.
-The ranking panel orders municipalities by their attraction balance.
-Figure~\ref{fig:ranking} shows Rio Grande do Sul, where Porto Alegre attracts far more patients than any other city, followed by Passo Fundo and Santa Maria, while Viam\~{a}o, Alvorada, and Gravata\'{\i} appear among the municipalities that depend on care produced elsewhere.
-A small number of hubs therefore sustains many surrounding towns.
-
-The map shows the same balance for a single specialty.
-Figure~\ref{fig:contrast} draws facial surgery for the two extremes of the ranking.
-Porto Alegre is covered by incoming blue arcs from across the state and from other states, whereas Viam\~{a}o shows mostly outgoing orange arcs.
-The width and direction of the arcs report the export of patients for the chosen specialty.
-The per-capita metric helps separate a large hub from one that is heavily loaded for its population, which is where a bottleneck is most likely.
-
-\subsection{Seasonal patterns}
-
-The third theme is seasonality, and whether a peak month falls on residents or on incoming patients.
-The monthly balance proves specific to each city.
-Figure~\ref{fig:seasonality} shows six municipalities across the twelve months of 2021.
-Vit\'{o}ria da Conquista (BA) is the most common case, where residents and incoming patients rise and fall together.
-Cear\'{a}-Mirim (RN) shows both groups climbing sharply from March, a clear peak that a hospital could anticipate.
-
-The other four cities show patterns that do not generalize.
-In Muri\'{a}e (MG) the incoming patients peak several times while residents stay flat.
-In Gurupi (TO) the resident and incoming peaks alternate through the year.
-In Luzi\^{a}nia (GO) and Teut\^{o}nia (RS) a rise in residents coincides with a fall in incoming patients, which suggests that residents are served first when local demand grows; Teut\^{o}nia also peaks in winter.
-
-This bears on the question of overload in peak months.
-In most cities residents and incoming patients move together, so a peak is not driven by a sudden influx from outside.
-In the few cities where the two diverge, the system appears to favor residents during the busiest months.
-Because the behavior varies so widely, the practical value of the monthly view is local: an institution can read the curve for its own city and prepare for its own peak.
-
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.95\columnwidth]{santa-maria-cardio-vs-gastro.jpeg}
   \caption{%
@@ -60,7 +30,20 @@ Because the behavior varies so widely, the practical value of the monthly view i
   \label{fig:gap}
 \end{figure}
 
-\begin{figure}[t]
+\subsection{Hub cities and regional load}
+
+The second theme is the hub city that concentrates the care of a region, where the demand it absorbs may signal overload or a bottleneck.
+The ranking panel orders municipalities by their attraction balance.
+Figure~\ref{fig:ranking} shows Rio Grande do Sul over 2019 to 2023, where Porto Alegre attracts far more patients than any other city, followed by Passo Fundo and Santa Maria, while Viam\~{a}o, Alvorada, and Gravata\'{\i} appear among the municipalities that depend on care produced elsewhere.
+A small number of hubs therefore sustains many surrounding towns.
+
+The map shows the same balance for a single specialty.
+Figure~\ref{fig:contrast} draws facial surgery over 2015 to 2023 for the two extremes of the ranking.
+Porto Alegre is covered by incoming blue arcs from across the state and from other states, whereas Viam\~{a}o shows mostly outgoing orange arcs.
+The width and direction of the arcs report the export of patients for the chosen specialty.
+The per-capita metric helps separate a large hub from one that is heavily loaded for its population, where a bottleneck would be more plausible.
+
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.92\columnwidth]{attract-vs-depend-more.jpeg}
   \caption{%
@@ -72,7 +55,7 @@ Because the behavior varies so widely, the practical value of the monthly view i
   \label{fig:ranking}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.92\columnwidth]{poa-vs-viamao-buco-maxilo-facial.jpeg}
   \caption{%
@@ -84,7 +67,27 @@ Because the behavior varies so widely, the practical value of the monthly view i
   \label{fig:contrast}
 \end{figure}
 
-\begin{figure*}[t]
+\subsection{Seasonal patterns}
+
+The third theme is seasonality, and whether a peak month falls on residents or on incoming patients.
+To gauge how common each pattern is, we measured, for every municipality with at least 50{,}000 admissions between 2015 and 2019 (191 in total), the Pearson correlation between two twelve-point seasonal profiles: the resident and the incoming admission totals by calendar month, pooled over the five years.
+Because the profiles are pooled by calendar month, the correlation reflects within-year seasonal shape rather than any multi-year trend.
+The two profiles are positively correlated in 96 percent of these municipalities and reach our chosen threshold for a strong relation, a Pearson $r \geq 0.5$, in 81 percent, so co-movement is the dominant pattern.
+Figure~\ref{fig:seasonality} shows six municipalities across the twelve months of 2021 that span the range we observed.
+Vit\'{o}ria da Conquista (BA) is a co-movement case, where residents and incoming patients rise and fall together.
+Cear\'{a}-Mirim (RN) shows both groups climbing sharply from March, a clear seasonal peak in both series.
+
+The other four cities show patterns that do not generalize.
+In Muri\'{a}e (MG) the incoming patients peak several times while residents stay flat.
+In Gurupi (TO) the resident and incoming peaks alternate through the year.
+In Luzi\^{a}nia (GO) and Teut\^{o}nia (RS) a rise in residents coincides with a fall in incoming patients, which suggests that residents are served first when local demand grows; Teut\^{o}nia also peaks in winter.
+
+This bears on the question of overload in peak months.
+Where the two series move together, which is the common case measured above, a peak is not driven by a sudden influx from outside.
+In the minority of cities where they diverge, such as Luzi\^{a}nia and Teut\^{o}nia, the system appears to favor residents during the busiest months.
+Because the behavior varies, the practical value of the monthly view is local: an institution can read the curve for its own city and prepare for its own peak.
+
+\begin{figure*}[tbp]
   \centering
   \includegraphics[width=\linewidth]{seasonal-charts.jpeg}
   \caption{%

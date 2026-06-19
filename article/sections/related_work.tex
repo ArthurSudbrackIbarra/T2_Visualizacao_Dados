@@ -10,11 +10,11 @@ Information visualization has long studied how to draw origin-destination (OD) d
 Drawing every flow as a straight line produces heavy occlusion, so much of the work looks for ways to reduce clutter.
 Wood et al.~\cite{Wood2010VisualisationOrigins} replaced lines with small gridded maps (OD maps) to avoid crossing flows, while Jenny et al.~\cite{Jenny2018DesignPrinciples} proposed design principles for line-based flow maps and Graser et al.~\cite{Graser2019Untangling} compared techniques for untangling OD flows in a GIS.
 For data that changes over time, Flowstrates~\cite{Boyandin2011Flowstrates} separates origins, destinations, and a temporal heatmap.
-We follow this line of work, using curved arcs and aggregation by level to keep the map readable.
+We borrow the clutter-reduction goal from this line of work and apply it through three concrete choices: curved arcs in place of straight lines, aggregation by administrative level so that only a tractable number of arcs is drawn at once, and a direction filter that hides the arcs the user is not inspecting.
 
 Interaction is what lets users work with large and multivariate data.
 Shneiderman's mantra of overview first, zoom and filter, then details on demand~\cite{Shneiderman1996EyesHaveIt}, together with the interaction categories of Yi et al.~\cite{Yi2007TowardDeeper}, describes the operations our tool depends on.
 The three-level drill-down and the specialty and time filters put these ideas to work on the hospitalization data.
 
-General flow-map tools such as kepler.gl and flowmap.blue can plot OD data, but they are not built around a dataset or a question.
-Our work connects the two threads above: it applies interactive OD visualization to the full SIH/SUS record and shapes the design around concrete questions about hospital access in Brazil.
+General flow-map tools such as kepler.gl and flowmap.blue can plot OD data, but they are generic plotters that a user must configure for each dataset.
+Our work connects the two threads above and adds three features that a generic plotter does not provide on this data: a three-level drill-down bound to the Brazilian administrative hierarchy, from federative unit to municipality; a precomputed aggregation that keeps the full 183 million record dataset interactive; and panels built for the access questions at hand, namely an attraction ranking and a resident-versus-incoming seasonal comparison.
