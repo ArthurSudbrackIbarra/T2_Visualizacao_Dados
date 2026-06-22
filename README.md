@@ -38,14 +38,11 @@ varredura). Toda agregação pesada acontece **uma vez** na ETL; o backend serve
 ```
 T2_Visualizacao_Dados/
 ├── README.md               # este arquivo — setup e reprodução
-├── CLAUDE.md               # contexto do projeto + esquema do banco (p/ devs e IA)
-├── PLAN.md                 # plano de implementação por fases (status atualizado)
 │
 ├── pyproject.toml          # deps Python (uv) — ETL + backend
 ├── uv.lock                 # lockfile uv (reprodutível)
 ├── .python-version         # Python 3.13
 │
-├── context/                # PDFs da disciplina (specs, slides T1, estrutura SIH) — referência
 ├── database/               # database.duckdb (26 GB, GIT-IGNORED — obter à parte)
 │
 ├── etl/                    # ── Fase 1: agregação offline ──
@@ -154,5 +151,5 @@ O frontend consome a API em `http://localhost:8000`. O CORS do backend já liber
 ## Dicas / solução de problemas
 - **"Aggregates DB not found"** ao subir o backend → rode a ETL (passo 2) antes.
 - **ETL lenta / memória** → ajuste `THREADS` e `MEMORY_LIMIT` no topo de `etl/build_aggregates.py`.
-- **Nunca** rode consultas ad-hoc na `internacoes` crua; use sempre os agregados (ver `CLAUDE.md`).
+- **Nunca** rode consultas ad-hoc na `internacoes` crua; use sempre os agregados.
 - `populacao`/per-capita só existem para 2008–2021 (cobertura do `socioeconomico`).

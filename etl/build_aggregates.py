@@ -5,7 +5,7 @@ Reads the big source DuckDB (read-only) and materializes compact aggregates into
 `etl/output/aggregates.duckdb`, which the FastAPI backend serves. This script is meant
 to run ONCE (offline). It takes several minutes.
 
-The golden rule (see CLAUDE.md): nothing interactive ever touches raw `internacoes`.
+The golden rule: nothing interactive ever touches raw `internacoes`.
 Everything downstream reads only the tables built here.
 
 Run:  uv run python etl/build_aggregates.py

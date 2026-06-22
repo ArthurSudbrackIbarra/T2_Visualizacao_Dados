@@ -3,7 +3,7 @@ Read-only DuckDB access to the precomputed aggregates.
 
 One shared connection is opened at import time; each query runs on its own `cursor()`
 so requests served on different threads don't collide (DuckDB cursors share the catalog
-but are independent for execution). Per CLAUDE.md, this DB contains ONLY small aggregate
+but are independent for execution). This DB contains ONLY small aggregate
 tables — never the 183M-row raw fact.
 """
 

@@ -1,5 +1,5 @@
 """
-FastAPI app — serves JSON from the precomputed aggregates only (see CLAUDE.md).
+FastAPI app — serves JSON from the precomputed aggregates only.
 
 Run (from repo root):
     uv run uvicorn backend.app.main:app --reload --port 8000
