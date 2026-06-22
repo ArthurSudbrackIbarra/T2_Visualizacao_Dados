@@ -16,9 +16,7 @@ The specialty used throughout is the bed-specialty field of SIH/SUS (\texttt{ESP
 
 The pass produces three aggregate tables, summarized in Figure~\ref{fig:architecture}.
 The flow table, with 13.5 million rows, keeps one row per origin, destination, specialty, year, and month, and feeds the arcs.
-Two per-municipality tables, one by year and one by year and month, store the admissions each place receives and generates; they feed the choropleth and the ranking, while the monthly resident and incoming series are read back from the flow table.
-These tables are small enough to query interactively.
-On a desktop with an Intel Core i7-4790, a flow query for one view returns in about 35 milliseconds and the per-municipality query that fills the choropleth in about 280 milliseconds, each the median of 25 warm runs against the aggregate tables.
+Two per-municipality tables, one by year and one by year and month, store the admissions each place receives and generates; they feed the ranking, while the monthly resident and incoming series are read back from the flow table.
 
 \begin{figure}[tbp]
   \centering
