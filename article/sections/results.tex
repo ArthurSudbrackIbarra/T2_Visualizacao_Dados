@@ -1,20 +1,24 @@
 \section{Usage Scenarios}
+\label{sec:scenarios}
 
 We now apply the tool to the three themes set out in the Introduction.
-These are usage scenarios rather than a systematic study: each case below was chosen by hand to demonstrate a capability, not sampled by a defined criterion, so the figures describe the chosen places and do not generalize on their own.
+These are usage scenarios rather than a systematic study.
+Each case below was chosen by hand to demonstrate a capability, not sampled by a defined criterion, so its figures describe the chosen places and do not generalize on their own.
 The scenarios use different year windows.
-For the spatial snapshots we use a recent complete year or a multi-year window that accumulates enough volume, with 2023 as the most recent year; for the seasonal analysis we use windows that end before 2023, because the final months of the latest year are still incomplete and would distort a monthly curve.
-Across the full 2008 to 2023 extract, 32 percent of the 183.3 million admissions (58.6 million) were recorded outside the patient's home municipality, counting an admission as exported when its residence and hospital municipalities differ; both counts come from the same aggregated dataset described in Section 3.
+The spatial snapshots use a recent complete year or a multi-year window that accumulates enough volume, with 2023 the most recent year.
+The seasonal analysis uses windows that end before 2023, because the final months of the latest year are still incomplete and would distort a monthly curve.
+As a sense of scale, across the full 2008 to 2023 extract 32 percent of the 183.3 million admissions (58.6 million) were recorded outside the patient's home municipality, counting an admission as exported when its residence and hospital municipalities differ.
+Both counts come from the same aggregated dataset described in Section~\ref{sec:design}, so cross-border flow is substantial and worth visualizing.
 
 \subsection{Gaps in care for a specialty}
 
 The first theme is the gap in care, where the residents of a region must travel for a given specialty.
 A municipality can be a hub for one specialty and dependent for another.
 Figure~\ref{fig:gap} shows Santa Maria, a hub in the interior of Rio Grande do Sul, under two specialties in 2023, the most recent complete year.
-For cardiology it received 3{,}391 admissions against 2{,}061 from its own residents, a positive balance of 1{,}330 and an export rate of 1 percent (12 of the 2{,}061 resident admissions were treated elsewhere).
-For gastroenterology it received 281 against 405 residents, a negative balance of 124 and an export rate of 45 percent (183 of 405).
+For cardiology it received 3{,}391 admissions against 2{,}061 from its own residents, a positive balance of 1{,}330 and an export rate of 0.58 percent: only 12 of the 2{,}061 resident admissions were treated elsewhere.
+For gastroenterology it received 281 against 405 residents, a negative balance of 124 and an export rate of 45.18 percent (183 of 405).
 
-Changing only the specialty filter turns Santa Maria from a blue hub reached by incoming arcs into a red municipality whose residents leave for other cities.
+Changing only the specialty filter turns Santa Maria from a destination reached by many incoming blue arcs into an origin whose residents leave along outgoing orange arcs.
 A pattern of this kind points a health authority to a specialty and a region that may need attention.
 Because the coverage of the specialty field is uneven, the reading is most reliable where a specialty has many admissions.
 
@@ -23,8 +27,8 @@ Because the coverage of the specialty field is uneven, the reading is most relia
   \includegraphics[width=0.95\columnwidth]{santa-maria-cardio-vs-gastro.jpeg}
   \caption{%
     Santa Maria (Rio Grande do Sul) under two specialties in 2023.
-    Top: cardiology, where the city is a hub reached by incoming blue arcs (balance $+1{,}330$, export rate 1 percent).
-    Bottom: gastroenterology, where its residents leave along orange arcs (balance $-124$, export rate 45 percent).
+    Top: cardiology, where the city is a hub reached by incoming blue arcs (balance $+1{,}330$, export rate 0.582 percent).
+    Bottom: gastroenterology, where its residents leave along orange arcs (balance $-124$, export rate 45.185 percent).
     Only the specialty filter changed between the two views.%
   }
   \label{fig:gap}
@@ -41,7 +45,6 @@ The map shows the same balance for a single specialty.
 Figure~\ref{fig:contrast} draws facial surgery over 2015 to 2023 for the two extremes of the ranking.
 Porto Alegre is covered by incoming blue arcs from across the state and from other states, whereas Viam\~{a}o shows mostly outgoing orange arcs.
 The width and direction of the arcs report the export of patients for the chosen specialty.
-The per-capita metric helps separate a large hub from one that is heavily loaded for its population, where a bottleneck would be more plausible.
 
 \begin{figure}[tbp]
   \centering
@@ -70,9 +73,11 @@ The per-capita metric helps separate a large hub from one that is heavily loaded
 \subsection{Seasonal patterns}
 
 The third theme is seasonality, and whether a peak month falls on residents or on incoming patients.
-To gauge how common each pattern is, we measured, for every municipality with at least 50{,}000 admissions between 2015 and 2019 (191 in total), the Pearson correlation between two twelve-point seasonal profiles: the resident and the incoming admission totals by calendar month, pooled over the five years.
-Because the profiles are pooled by calendar month, the correlation reflects within-year seasonal shape rather than any multi-year trend.
-The two profiles are positively correlated in 96 percent of these municipalities and reach our chosen threshold for a strong relation, a Pearson $r \geq 0.5$, in 81 percent, so co-movement is the dominant pattern.
+To gauge how common each pattern is, we built two seasonal profiles for every municipality with at least 50{,}000 admissions between 2015 and 2019, 191 in total.
+Each profile is a twelve-point curve of admissions by calendar month, pooled over the five years, one for resident admissions and one for incoming ones.
+We then took the Pearson correlation between the two profiles.
+Pooling by calendar month means the correlation reflects within-year seasonal shape, not any multi-year trend.
+The two profiles are positively correlated in 96 percent of these municipalities, and in 81 percent they reach $r \geq 0.5$, our chosen threshold for a strong relation, so co-movement is the dominant pattern.
 Figure~\ref{fig:seasonality} shows six municipalities across the twelve months of 2021 that span the range we observed.
 Vit\'{o}ria da Conquista (BA) is a co-movement case, where residents and incoming patients rise and fall together.
 Cear\'{a}-Mirim (RN) shows both groups climbing sharply from March, a clear seasonal peak in both series.

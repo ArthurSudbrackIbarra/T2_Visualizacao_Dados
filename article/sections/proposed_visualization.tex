@@ -1,4 +1,5 @@
 \section{Proposed Visualization}
+\label{sec:design}
 
 \subsection{Data preparation}
 
@@ -9,14 +10,15 @@ To keep interaction fast, we move all of the heavy work to an offline step that 
 This step makes one pass over the fact table.
 It joins each admission to the municipality where the patient lives and to the municipality of the hospital, then groups the rows by origin, destination, specialty, year, and month.
 Municipality codes follow the six-digit IBGE scheme and resolve against a municipality table that carries latitude and longitude.
-The window from 2008 to 2023 covers 183{,}274{,}245 admissions, and no record is dropped at this stage, since every admission has a valid municipality code.
-Nineteen of the 5{,}589 municipalities (0.3 percent) have no coordinates, so the few flows that touch them are not drawn on the map.
-The specialty used throughout is the bed-specialty field of SIH/SUS (\texttt{ESPEC}); its coverage is uneven, a limitation we return to in the Conclusion.
+The window from 2008 to 2023 covers 183{,}274{,}245 admissions.
+No record is dropped at this stage, since every admission carries a valid municipality code; only 19 of the 5{,}589 municipalities (0.3 percent) lack coordinates, so the few flows that touch them are not drawn on the map.
+The specialty used throughout is the bed-specialty field of SIH/SUS (\texttt{ESPEC}), whose coverage is uneven, a limitation we return to in the Conclusion.
 
 The pass produces three aggregate tables, summarized in Figure~\ref{fig:architecture}.
 The flow table, with 13.5 million rows, keeps one row per origin, destination, specialty, year, and month, and feeds the arcs.
-Two per-municipality tables, one by year and one by year and month, store the admissions each place receives and generates and feed the choropleth and the ranking, while the monthly resident and incoming series are read back from the flow table.
-On a desktop with an Intel Core i7-4790, a flow query for one view returns in about 35 milliseconds and the per-municipality query that fills the choropleth in about 280 milliseconds, each measured as the median of 25 warm runs directly on the aggregate tables.
+Two per-municipality tables, one by year and one by year and month, store the admissions each place receives and generates; they feed the choropleth and the ranking, while the monthly resident and incoming series are read back from the flow table.
+These tables are small enough to query interactively.
+On a desktop with an Intel Core i7-4790, a flow query for one view returns in about 35 milliseconds and the per-municipality query that fills the choropleth in about 280 milliseconds, each the median of 25 warm runs against the aggregate tables.
 
 \begin{figure}[tbp]
   \centering
@@ -49,16 +51,15 @@ We draw each hospitalization flow as a curved arc from the patient's residence t
 The width of the arc grows with the number of admissions, so the thickest arcs mark the busiest routes.
 Color marks the direction relative to the place in focus, with arcs that leave a region drawn in orange and arcs that arrive drawn in blue.
 
-A choropleth sits behind the arcs and fills each state or municipality according to a metric chosen by the user.
+A choropleth sits behind the arcs and fills each state according to a metric chosen by the user.
 The tool offers five metrics, shown for the whole country in Figure~\ref{fig:metrics}.
-The default is the attraction balance, the admissions a place receives minus the admissions its own residents generate; it uses a diverging blue-to-red scale, where blue marks a net attractor and red marks a place that sends away more patients than it receives.
-The export rate is the admissions of residents treated in another municipality divided by all admissions of those residents, on a yellow-to-red scale.
-Two metrics report absolute volume, the admissions received on a blue scale and the admissions exported on an orange scale.
-The fifth divides the admissions received by the local population, times one thousand, to give a per-capita rate on a purple scale; it draws on IBGE population figures and is available for 2008 to 2021, the years those figures cover.
-City nodes appear as circles sized by the number of admissions that pass through them, and a dark basemap is used so the arcs and nodes stand out against it.
+The default is the \emph{attraction balance}: the admissions a place receives minus the admissions its own residents generate, on a diverging blue-to-red scale, where blue marks a net attractor and red a place that sends away more patients than it receives.
+The \emph{export rate} is the share of a place's resident admissions that are treated in another municipality, on a yellow-to-red scale.
+Two metrics report absolute volume, the \emph{admissions received} on a blue scale and the \emph{admissions exported} on an orange scale.
+The fifth, a \emph{per-capita rate}, divides the admissions received by the local population and multiplies by one thousand, on a purple scale; it draws on IBGE population figures and is available for 2008 to 2021, the years those figures cover.
+City nodes appear as circles sized by the number of admissions that pass through them, over a dark basemap that keeps the arcs and nodes distinct.
 
 The arc colors and the choropleth scales are independent encodings, and the legend states which is active: orange and blue mark arc direction, while the choropleth uses its own per-metric scale and is darkened so the brighter arcs stay distinct.
-The scales come from ColorBrewer schemes, a diverging red-blue for the balance and single-hue scales for the other metrics, chosen to remain distinguishable under common forms of color-vision deficiency.
 
 \begin{figure*}[tbp]
   \centering

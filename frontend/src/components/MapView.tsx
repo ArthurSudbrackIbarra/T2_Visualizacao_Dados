@@ -295,7 +295,14 @@ function metricRows(m?: NodeMetric): string {
       : raw && typeof raw === "object"
         ? Number(raw.parsedValue)
         : null;
-  const pct = taxa == null || isNaN(taxa) ? "—" : `${Math.round(taxa * 100)}%`;
+  // Three decimal places so small rates stay accurate (e.g. 0.582% is not rounded up to 1%).
+  const pct =
+    taxa == null || isNaN(taxa)
+      ? "—"
+      : `${(taxa * 100).toLocaleString("pt-BR", {
+          minimumFractionDigits: 3,
+          maximumFractionDigits: 3,
+        })}%`;
   const saldo = Number(m.saldo ?? 0);
   const saldoStr = (saldo > 0 ? "+" : "") + saldo.toLocaleString("pt-BR");
   return (

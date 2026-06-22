@@ -7,11 +7,13 @@ It is a general-purpose dataset, since each record carries more than one hundred
 The same record also stores the patient's municipality of residence and the municipality of the hospital, so a single admission already describes a movement between two places.
 
 This work sets the clinical and financial fields aside and concentrates on that movement.
-The origin and destination together expose problems of access that the other fields do not show directly, and the flow of patients can point to planning problems, bottlenecks, gaps in care, and regional overload.
+Origin and destination together expose problems of access that the other fields do not show directly.
+The flow of patients can point to gaps in care, bottlenecks at regional hubs, and local overload.
 
 Our extract holds 183 million admissions from 2008 to 2023.
 The official route to this public data is the DATASUS tabulation portal, which returns the records as configurable tables.
-At this scale a table is a weak instrument for the flow of patients: reading movement among thousands of municipalities from rows and columns is impractical, and aggregate counts can conceal where a region depends on outside care.
+A table is a weak instrument for this question.
+Reading movement among thousands of municipalities from rows and columns is impractical, and the aggregate counts a table reports can hide where a region depends on care produced elsewhere.
 
 We present an interactive flow map of these hospitalization flows.
 Each arc links a patient's residence to the hospital municipality, and its width grows with the number of admissions.
@@ -21,8 +23,8 @@ We do not claim to identify every gap or bottleneck in the system, nor do we eva
 This paper is a design and system description: we explain how the visualization is built to make these patterns easier to see than a table allows, and we present case studies that illustrate its use.
 A study with health managers is left for future work.
 
-The design supports three themes of analysis that motivated the project:
-(a) gaps in care, where the residents of a region must travel for a given specialty, which can show a government where attention is needed;
-(b) hub cities that concentrate the care of a whole region, where the concentration of demand may signal overload or a bottleneck for planning;
-(c) the effect of seasonality, that is, whether peaks fall on residents or on incoming patients, how different cities absorb them, and whether a peak month raises the share of incoming patients or the system serves residents first.
-The remaining sections describe the data preparation and the design of the visualization, and then present case studies for each theme.
+The design supports three themes of analysis that motivated the project.
+The first is gaps in care, where the residents of a region must travel for a given specialty, which can show a government where attention is needed.
+The second is hub cities that concentrate the care of a whole region, where the demand they absorb may signal overload or a bottleneck for planning.
+The third is seasonality: whether a monthly peak falls on residents or on incoming patients, and whether a city serves its own residents first or absorbs an influx from elsewhere.
+The remaining sections describe the data preparation and the design of the visualization, and then present a case study for each theme.
