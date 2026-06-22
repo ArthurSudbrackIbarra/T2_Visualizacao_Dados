@@ -9,13 +9,6 @@ Transforma a `internacoes` (183M linhas) em tabelas compactas que o backend serv
 uv run python etl/build_aggregates.py    # ~3 min, faz 1 scan da tabela grande
 ```
 
-Se você já tem um `aggregates.duckdb` antigo (sem `fato_municipio_mes`), rode a migração
-incremental — ela só lê tabelas já agregadas, **não** toca na base de 26 GB:
-
-```bash
-uv run python etl/add_municipio_mes.py   # ~2 s
-```
-
 Config no topo do script: `START_YEAR=2008`, `END_YEAR=2023`, `THREADS`, `MEMORY_LIMIT`.
 Janela 2008–2023 cobre 183,27M das 183,88M linhas (pré-2008 é esparso) e alinha com a
 cobertura de `socioeconomico` (2008–2021).
@@ -41,8 +34,7 @@ Grão: `(munic_id, ano, espec_id)`. Derivada de `fato_fluxo` (não relê a tabel
 Grão: `(munic_id, ano, mes, espec_id)`. Idêntica à `fato_municipio_ano` mais a dimensão
 `mes`, derivada de `fato_fluxo` (`populacao`/`leitos_sus` reanexados por `(munic, ano)`).
 Permite filtrar o coroplético e o ranking por mês e por intervalo de anos; somada sobre os
-meses reproduz exatamente a `fato_municipio_ano`. Construída por `build_aggregates.py` e
-também pela migração `add_municipio_mes.py`.
+meses reproduz exatamente a `fato_municipio_ano`.
 
 ### Dimensões
 - `dim_municipio` (`munic_id, nome, uf, regiao_saude, lat, lon`) — lat/lon movem o mapa.

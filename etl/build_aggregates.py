@@ -188,7 +188,7 @@ def main() -> None:
     # -- fato_municipio_mes : same metrics at (munic, ano, MÊS, espec) grain --
     # Powers month-filtered choropleth/ranking. Derived from fato_fluxo; population
     # is reattached per (munic, ano) from the annual table. Summed over months it
-    # equals fato_municipio_ano exactly. SQL mirrored in etl/add_municipio_mes.py.
+    # equals fato_municipio_ano exactly.
     log("building fato_municipio_mes (from fato_fluxo) ...")
     con.execute(
         """
