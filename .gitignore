@@ -1,0 +1,17 @@
+# Database file (26 GB — never commit).
+database/database.duckdb
+database/*.duckdb
+
+# ETL outputs (generated aggregates).
+etl/output/
+*.parquet
+
+# Python.
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Node / frontend.
+**/node_modules/
+frontend/dist/

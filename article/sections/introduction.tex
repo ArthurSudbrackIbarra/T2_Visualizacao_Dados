@@ -1,0 +1,30 @@
+Brazil's Unified Health System (SUS) guarantees every resident the right to publicly funded hospital care.
+In practice, hospitals and medical specialties are distributed unevenly across the territory, so a large number of patients are admitted far from where they live.
+Knowing where these patients go, and for which specialties, is valuable for planning hospital capacity and for identifying regions that depend on care produced elsewhere.
+
+The Hospital Information System of SUS (SIH/SUS), published by DATASUS, records every publicly funded admission.
+It is a general-purpose dataset, since each record carries more than one hundred fields, among them diagnoses, procedures, costs, length of stay, intensive care use, and patient demographics.
+The same record also stores the patient's municipality of residence and the municipality of the hospital, so a single admission already describes a movement between two places.
+
+This work sets the clinical and financial fields aside and concentrates on that movement.
+Origin and destination together expose problems of access that the other fields do not show directly.
+The flow of patients can point to gaps in care, bottlenecks at regional hubs, and local overload.
+
+Our extract holds 183 million admissions from 2008 to 2023.
+The official route to this public data is the DATASUS tabulation portal, which returns the records as configurable tables.
+A table is a weak instrument for this question.
+Reading movement among thousands of municipalities from rows and columns is impractical, and the aggregate counts a table reports can hide where a region depends on care produced elsewhere.
+
+We present an interactive flow map of these hospitalization flows.
+Each arc links a patient's residence to the hospital municipality, and its width grows with the number of admissions.
+The view operates at three levels, from the whole country down to a state and then a single municipality, and it can be filtered by specialty, year, and month.
+
+We do not claim to identify every gap or bottleneck in the system, nor do we evaluate the tool with users.
+This paper is a design and system description: we explain how the visualization is built to make these patterns easier to see than a table allows, and we present case studies that illustrate its use.
+A study with health managers is left for future work.
+
+The design supports three themes of analysis that motivated the project.
+The first is gaps in care, where the residents of a region must travel for a given specialty, which can show a government where attention is needed.
+The second is hub cities that concentrate the care of a whole region, where the demand they absorb may signal overload or a bottleneck for planning.
+The third is seasonality: whether a monthly peak falls on residents or on incoming patients, and whether a city serves its own residents first or absorbs an influx from elsewhere.
+The remaining sections describe the data preparation and the design of the visualization, and then present a case study for each theme.

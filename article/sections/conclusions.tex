@@ -1,0 +1,34 @@
+\section{Conclusion and Future Work}
+
+We presented an interactive flow map of hospital admissions in the Brazilian public system.
+The tool draws each admission as an arc from the patient's residence to the hospital municipality, works at the national, state, and municipal levels, and lets the user filter by specialty, year, and month.
+Through usage scenarios we illustrated how it can bring out gaps in care for a specialty, the hub cities that concentrate the care of a region, and the seasonal balance between resident and incoming patients.
+The contribution is the visualization itself, which is built to expose movement that the official tabular access leaves implicit.
+
+The central limitation is that we have not evaluated the tool with users.
+The scenarios in Section~\ref{sec:scenarios} are hand-picked illustrations, so they show that the tool can produce these readings, not that it helps an analyst reach them faster or more reliably than the existing portal.
+We therefore make no claim of measured effectiveness, and a study with health managers, outlined below, is the natural next step.
+
+A second limitation concerns the specialty field.
+SIH/SUS records the specialty of the hospital bed (\texttt{ESPEC}), as noted in Section~\ref{sec:design}, and this field is sparsely filled.
+A few categories, mainly oral and maxillofacial surgery, general surgery, cardiology, and a combined surgical and diagnostic category, account for almost all admissions, while specialties such as oncology and endocrinology appear in very few records, and several others had too little data to keep.
+Much of this care is likely registered through the procedure and diagnosis fields rather than the bed specialty, so a filter built on this single field gives only a partial view.
+
+Other limits follow from the same design choices.
+The latest year is incomplete in its final months, so the scenarios rely on complete years.
+State-level arcs start from state centroids, and the few municipalities without coordinates are left out.
+The per-capita metric depends on IBGE population figures and so covers only 2008 to 2021.
+Finally, the tool shows where demand concentrates but does not measure hospital capacity, so it points to possible overload rather than confirming it.
+
+Future work follows directly from these limits.
+The first priority is the evaluation that this paper lacks.
+We plan two lightweight studies: a walkthrough in which a small group of health-data analysts carry out defined tasks with the tool, and a comparison against the DATASUS portal that measures the time to answer a handful of representative questions.
+Both are proposed here rather than reported, since we have not yet run them.
+
+The remaining directions address the data limits.
+Reading the procedure and diagnosis fields would recover the specialties that the bed-specialty field misses and would widen the analysis of care gaps.
+Joining the flows to the number of SUS beds would turn the signal of concentration into a measure of load.
+Finer geography, such as health regions and population-weighted centroids, would sharpen the map, and the cost and length-of-stay fields would add a financial and outcome dimension to the movement of patients.
+
+The SIH/SUS data used here is public and distributed by DATASUS.
+The source code of the tool is available from the authors on request.
